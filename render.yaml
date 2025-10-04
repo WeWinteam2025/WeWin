@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: wewin-api
+    env: python
+    plan: starter
+    buildCommand: pip install -r apps/api_django/requirements.txt && python apps/api_django/manage.py collectstatic --noinput || true
+    startCommand: gunicorn config.wsgi:application --chdir apps/api_django --bind 0.0.0.0:10000
+    healthCheckPath: /healthz
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: 'false'
+      - key: ALLOWED_HOSTS
+        value: wewin.space,www.wewin.space,api.wewin.space
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: 'true'
+
+  - type: static_site
+    name: wewin-web
+    buildCommand: cd apps/web_html && npm install && npx vite build
+    publishPath: apps/web_html/dist
+    routes:
+      - type: redirect
+        source: /
+        destination: /index.html
+
+
