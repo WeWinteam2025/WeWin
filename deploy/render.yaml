@@ -18,7 +18,7 @@ services:
       - key: CORS_ALLOW_ALL_ORIGINS
         value: 'true'
 
-  - type: static_site
+  - type: static
     name: wewin-web
     buildCommand: cd apps/web_html && npm install && npx vite build
     publishPath: apps/web_html/dist
