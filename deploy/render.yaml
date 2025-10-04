@@ -3,8 +3,8 @@ services:
     name: wewin-api
     env: python
     plan: starter
-    buildCommand: pip install -r apps/api_django/requirements.txt && python apps/api_django/manage.py collectstatic --noinput || true
-    startCommand: gunicorn config.wsgi:application --chdir apps/api_django --bind 0.0.0.0:10000
+    buildCommand: pip install -r apps/api_django/requirements.txt
+    startCommand: gunicorn config.wsgi:application --chdir apps/api_django --bind 0.0.0.0:$PORT
     healthCheckPath: /healthz
     envVars:
       - key: SECRET_KEY
