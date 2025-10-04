@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>We Win • Crear cuenta</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="/public/config.js"></script>
+  </head>
+  <body class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md card">
+      <h1 class="text-xl font-semibold mb-4">Crear cuenta</h1>
+      <form id="register-form" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Nombre</label>
+          <input id="first_name" type="text" class="input" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Email</label>
+          <input id="email" type="email" class="input" placeholder="tu@correo.com" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Contraseña</label>
+          <input id="password" type="password" class="input" placeholder="••••••" />
+        </div>
+        <button type="submit" class="btn-primary w-full">Crear cuenta</button>
+      </form>
+      <p class="text-sm text-[color:var(--text-secondary)] mt-4">¿Ya tienes cuenta? <a href="/auth/login.html">Ingresar</a></p>
+      <script>
+        const API = window.API_BASE || 'http://localhost:8001';
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const first_name = document.getElementById('first_name').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          try {
+            const res = await fetch(`${API}/api/register`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password, first_name })
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              alert(err.detail || 'No se pudo registrar');
+              return;
+            }
+            // Auto-login
+            const loginRes = await fetch(`${API}/api/token/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: email, password })
+            });
+            const tokens = await loginRes.json();
+            if (loginRes.ok && tokens.access) {
+              localStorage.setItem('access', tokens.access);
+              localStorage.setItem('refresh', tokens.refresh || '');
+              window.location.href = '/dash/profile.html';
+            } else {
+              alert('Cuenta creada, pero no se pudo iniciar sesión. Intenta ingresar.');
+              window.location.href = '/auth/login.html';
+            }
+          } catch (err) {
+            alert('Error de red');
+          }
+        });
+      </script>
+    </div>
+  </body>
+  </html>
+
+

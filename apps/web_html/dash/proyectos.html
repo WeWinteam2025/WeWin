@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proyectos</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-6xl px-6 py-8 space-y-6">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold">Proyectos</h1>
+      <div id="projects-grid" class="grid md:grid-cols-3 gap-4">
+        Cargando tarjetas...
+      </div>
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Mediciones recientes</h2>
+        <div id="measurements-list">Cargando mediciones...</div>
+      </section>
+    </div>
+  </body>
+</html>
+<script>
+  const API = 'http://localhost:8001';
+  async function loadProjects() {
+    const target = document.getElementById('projects-grid');
+    try {
+      const token = localStorage.getItem('access');
+      if (!token) { target.innerHTML = 'Inicia sesión para ver proyectos.'; return; }
+      const res = await fetch(`${API}/api/projects/`, { headers: { 'Authorization': `Bearer ${token}` }});
+      if (!res.ok) {
+        if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver proyectos.'; return; }
+        target.innerHTML = '<div class="text-red-600">Error cargando proyectos.</div>'; return;
+      }
+      let data = await res.json();
+      if (!Array.isArray(data) && data?.value) data = data.value; // compat PowerShell dump
+      if (!Array.isArray(data)) data = [];
+      if (data.length === 0) {
+        target.innerHTML = '<div class="text-[color:var(--text-secondary)]">No hay proyectos aún.</div>';
+        return;
+      }
+      target.innerHTML = data.map(p => `
+        <a class="card block" href="/dash/proyecto.html?id=${p.id}">
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
+          <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo}</div>
+          <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
+          <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>
+          <div class="text-sm">Estado: ${p.estado}</div>
+        </a>
+      `).join('');
+    } catch (e) {
+      target.innerHTML = '<div class="text-red-600">Error cargando proyectos.</div>';
+    }
+  }
+  async function loadMeasurements() {
+    const target = document.getElementById('measurements-list');
+    const token = localStorage.getItem('access');
+    if (!token) { target.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
+    try {
+      const res = await fetch(`${API}/api/measurements/`, { headers: { 'Authorization': `Bearer ${token}` }});
+      if (!res.ok) {
+        if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
+        target.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>'; return;
+      }
+      let data = await res.json();
+      if (!Array.isArray(data) && data?.value) data = data.value;
+      if (!Array.isArray(data)) data = [];
+      if (data.length === 0) { target.innerHTML = 'Sin mediciones.'; return; }
+      target.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-left text-[color:var(--text-secondary)]">
+              <tr><th class="py-2">Proyecto</th><th class="py-2">Periodo</th><th class="py-2">kWh gen</th><th class="py-2">kWh cons</th><th class="py-2">Excedente</th></tr>
+            </thead>
+            <tbody>
+              ${data.map(m => `<tr class="border-t border-slate-200"><td class="py-2">${m.proyecto}</td><td>${m.periodo}</td><td>${m.kwh_gen}</td><td>${m.kwh_cons}</td><td>${m.kwh_exced}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      target.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>';
+    }
+  }
+  loadProjects();
+  loadMeasurements();
+</script>

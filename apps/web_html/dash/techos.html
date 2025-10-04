@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publicar Techo</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-4xl px-6 py-8 space-y-6">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold">Publicar Techo</h1>
+      <form class="card space-y-3" hx-post="http://localhost:8001/api/roof/list" hx-target="#flash" hx-swap="innerHTML">
+        <input name="ubicacion" class="input" placeholder="Dirección / Coordenadas" required />
+        <input name="sombras" class="input" placeholder="Sombras (baja/media/alta)" />
+        <input name="fotos" class="input" placeholder="URLs de fotos (coma separadas)" />
+        <button class="btn-primary">Publicar</button>
+      </form>
+      <div id="flash" class="text-sm text-[color:var(--text-secondary)]"></div>
+    </div>
+  </body>
+  </html>
+
+
+
+

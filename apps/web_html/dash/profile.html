@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="/public/config.js"></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-3xl px-6 py-8 space-y-6">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold">Perfil</h1>
+      <div class="card space-y-4">
+        <div class="flex items-center gap-4">
+          <img id="avatar" src="https://www.gravatar.com/avatar/?d=identicon" class="w-16 h-16 rounded-full"/>
+          <div>
+            <div id="username" class="font-semibold"></div>
+            <div id="email" class="text-[color:var(--text-secondary)] text-sm"></div>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <form id="profile-form" class="space-y-2">
+            <label class="block text-sm">Nombre</label>
+            <input id="first_name" class="input"/>
+            <label class="block text-sm">Apellido</label>
+            <input id="last_name" class="input"/>
+            <label class="block text-sm">Tipo Stakeholder</label>
+            <input id="stakeholder_type" class="input" placeholder="BUYER/INSTALLER/etc"/>
+            <label class="block text-sm">Edad</label>
+            <input id="age" type="number" class="input"/>
+            <label class="block text-sm">Ciudad</label>
+            <input id="city" class="input"/>
+            <label class="block text-sm">País</label>
+            <input id="country" class="input"/>
+            <label class="block text-sm">Correo</label>
+            <input id="email_input" type="email" class="input"/>
+            <button class="btn-primary" type="submit">Guardar</button>
+          </form>
+          <form id="avatar-form" class="space-y-2">
+            <label class="block text-sm">Avatar URL</label>
+            <input id="avatar_url" class="input" placeholder="https://..."/>
+            <button class="btn-primary" type="submit">Guardar Avatar</button>
+          </form>
+        </div>
+        <div id="flash" class="text-sm text-[color:var(--text-secondary)]"></div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    <script>
+      const API = window.API_BASE || 'http://localhost:8001';
+      const token = localStorage.getItem('access');
+      if (!token) { document.getElementById('flash').innerText = 'Inicia sesión.'; }
+      async function load(){
+        try{
+          const res = await fetch(`${API}/api/me`, { headers: { Authorization: 'Bearer ' + token }});
+          const me = await res.json();
+          document.getElementById('username').innerText = me.username || 'usuario';
+          document.getElementById('email').innerText = me.email || '';
+          const pr = await fetch(`${API}/api/profiles/?current=1`, { headers: { Authorization: 'Bearer ' + token }});
+          let data = await pr.json();
+          const profile = Array.isArray(data) ? data[0] : (data.value ? data.value[0] : null);
+          if (profile){
+            if (profile.avatar_url){
+              document.getElementById('avatar').src = profile.avatar_url;
+              document.getElementById('avatar_url').value = profile.avatar_url;
+            }
+            document.getElementById('first_name').value = profile.first_name || '';
+            document.getElementById('last_name').value = profile.last_name || '';
+            document.getElementById('stakeholder_type').value = profile.stakeholder_type || '';
+            document.getElementById('age').value = profile.age || '';
+            document.getElementById('city').value = profile.city || '';
+            document.getElementById('country').value = profile.country || '';
+            document.getElementById('email_input').value = profile.email || '';
+            document.getElementById('avatar-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const url = document.getElementById('avatar_url').value;
+              const u = await fetch(`${API}/api/profiles/${profile.id}/`, { method:'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ ...profile, avatar_url: url })});
+              if (u.ok){ document.getElementById('flash').innerText = 'Avatar actualizado'; document.getElementById('avatar').src = url; }
+              else { document.getElementById('flash').innerText = 'Error actualizando'; }
+            });
+            document.getElementById('profile-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const body = { ...profile,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                stakeholder_type: document.getElementById('stakeholder_type').value,
+                age: parseInt(document.getElementById('age').value || '0') || null,
+                city: document.getElementById('city').value,
+                country: document.getElementById('country').value,
+                email: document.getElementById('email_input').value,
+              };
+              const u = await fetch(`${API}/api/profiles/${profile.id}/`, { method:'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body)});
+              document.getElementById('flash').innerText = u.ok ? 'Perfil actualizado' : 'Error actualizando perfil';
+            });
+          }
+        }catch(e){ document.getElementById('flash').innerText = 'Error cargando perfil'; }
+      }
+      load();
+    </script>
+  </body>
+  </html>
+
+

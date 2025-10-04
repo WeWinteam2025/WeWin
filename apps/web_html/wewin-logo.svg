@@ -1,0 +1,16 @@
+<svg width="128" height="32" viewBox="0 0 512 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2BB673"/>
+      <stop offset="100%" stop-color="#1E7A4A"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <circle cx="48" cy="64" r="32" fill="url(#g)"/>
+    <path d="M40 80l12-24h-8l8-16" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="96" y="76" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="56" font-weight="700" fill="#0F172A">WeWin</text>
+</svg>
+
+
+

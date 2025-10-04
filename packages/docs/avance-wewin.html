@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>We Win • Informe de Avance</title>
+    <style>
+      :root {
+        --bg: #0b0c0f;
+        --card: #12141a;
+        --text: #e6e7eb;
+        --muted: #9aa0aa;
+        --accent: #5b9cff;
+        --ok: #2bb673;
+        --warn: #e3b341;
+      }
+      html, body { background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+      .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+      h1 { font-size: 28px; margin: 0 0 8px; }
+      h2 { font-size: 20px; margin: 24px 0 8px; }
+      h3 { font-size: 16px; margin: 16px 0 6px; color: var(--muted); }
+      p { line-height: 1.6; margin: 8px 0; }
+      ul { margin: 6px 0 12px 18px; }
+      li { margin: 4px 0; }
+      .card { background: var(--card); border: 1px solid #1b1f2a; border-radius: 10px; padding: 16px; margin: 16px 0; }
+      .muted { color: var(--muted); }
+      .kbd { background: #1d2230; padding: 2px 6px; border-radius: 4px; border: 1px solid #2a3246; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+      .ok { color: var(--ok); }
+      .warn { color: var(--warn); }
+      code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+      pre { background: #0e1117; border: 1px solid #1b1f2a; padding: 12px; border-radius: 8px; overflow: auto; }
+      a { color: var(--accent); text-decoration: none; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media print {
+        body { background: #fff; color: #111; }
+        .card { border-color: #ddd; }
+        a { color: #0366d6; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>We Win • Informe de Avance</h1>
+      <div class="muted">Fecha: <span id="today"></span></div>
+
+      <div class="card">
+        <h2>Resumen ejecutivo</h2>
+        <ul>
+          <li><b>Backend Django REST</b> con JWT activo: emisión y refresh de tokens.</li>
+          <li><b>Perfil de usuario</b>: endpoint <span class="kbd">/api/me</span> ampliado con email; <span class="kbd">/api/profiles</span> protegido.</li>
+          <li><b>Registro</b>: nuevo <span class="kbd">POST /api/register</span> crea <i>User</i> y <i>UserProfile</i>.</li>
+          <li><b>Frontend estático</b> (Vite/Tailwind): login funcional; registro con auto-login; pantalla de perfil editable.</li>
+          <li><b>DB</b>: SQLite por defecto; <span class="kbd">DATABASE_URL</span> soportado (SSL) para Postgres/Supabase.</li>
+          <li><b>Healthcheck</b>: <span class="kbd">GET /healthz</span>. CORS habilitado en desarrollo.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Arquitectura y módulos</h2>
+        <div class="grid">
+          <div>
+            <h3>Backend (Django)</h3>
+            <ul>
+              <li><span class="kbd">apps/api_django/config/settings.py</span>: DRF, JWT, CORS, DB.</li>
+              <li><span class="kbd">apps/api_django/config/urls.py</span>: rutas raíz y JWT.</li>
+              <li><span class="kbd">apps/api_django/api/</span>: utilidades de API (<span class="kbd">/api/me</span>, <span class="kbd">/api/register</span>).</li>
+              <li><span class="kbd">apps/api_django/core/</span>: perfiles, organizaciones, proyectos, contratos.</li>
+              <li>Otros dominios: <span class="kbd">market</span>, <span class="kbd">catalog</span>, <span class="kbd">epc</span>, <span class="kbd">governance</span>, <span class="kbd">consulting</span>.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Frontend (Web)</h3>
+            <ul>
+              <li><span class="kbd">apps/web_html/auth/login.html</span>: login con JWT.</li>
+              <li><span class="kbd">apps/web_html/auth/register.html</span>: registro + auto-login.</li>
+              <li><span class="kbd">apps/web_html/dash/profile.html</span>: edición de perfil y avatar.</li>
+              <li>Layout y componentes en <span class="kbd">apps/web_html/partials/</span>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Endpoints principales</h2>
+        <h3>Autenticación</h3>
+        <ul>
+          <li><span class="kbd">POST /api/token/</span>: login (username/email + password).</li>
+          <li><span class="kbd">POST /api/token/refresh/</span>: refresh de token.</li>
+          <li><span class="kbd ok">POST /api/register</span>: crea usuario + perfil.</li>
+          <li><span class="kbd">GET /api/me</span> (JWT): id, username, email, is_authenticated.</li>
+        </ul>
+        <h3>Core (JWT)</h3>
+        <ul>
+          <li><span class="kbd">/api/profiles/</span> (GET/PUT/PATCH/…; soporte <span class="kbd">?current=1</span>).</li>
+          <li><span class="kbd">/api/projects/</span>, <span class="kbd">/api/measurements/</span>, <span class="kbd">/api/contracts/</span>.</li>
+          <li><span class="kbd">/api/organizations/</span>, <span class="kbd">/api/actors/</span>.</li>
+        </ul>
+        <h3>Otros dominios</h3>
+        <ul>
+          <li><span class="kbd">/api/products/</span>, <span class="kbd">/api/order/</span> (catalog).</li>
+          <li>Market, EPC, Governance, Consulting: rutas registradas vía routers DRF.</li>
+        </ul>
+        <h3>Health</h3>
+        <ul>
+          <li><span class="kbd">GET /healthz</span> (público).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Seguridad y CORS</h2>
+        <ul>
+          <li><b>Auth</b>: <span class="kbd">rest_framework_simplejwt</span> como autenticación por defecto.</li>
+          <li><b>CORS</b>: <span class="kbd">CORS_ALLOW_ALL_ORIGINS=true</span> en desarrollo.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Base de datos</h2>
+        <ul>
+          <li><b>Dev</b>: SQLite.</li>
+          <li><b>Prod</b>: <span class="kbd">DATABASE_URL</span> (SSL) soportado para Postgres/Supabase.</li>
+          <li>Scripts de prueba: <span class="kbd">apps/api_django/scripts/test_db.py</span>, <span class="kbd">.../test_db_explicit.py</span>.</li>
+          <li class="muted">URI de Supabase disponible para configuración.</li>
+        </ul>
+        <h3>Variables .env sugeridas</h3>
+        <pre>SECRET_KEY=... 
+DEBUG=true
+ALLOWED_HOSTS=*
+DATABASE_URL=postgresql://&lt;user&gt;:&lt;pass&gt;@&lt;host&gt;:&lt;port&gt;/postgres
+CORS_ALLOW_ALL_ORIGINS=true</pre>
+      </div>
+
+      <div class="card">
+        <h2>Frontend: flujo de usuario</h2>
+        <ul>
+          <li>Registro en <span class="kbd">/auth/register.html</span> → auto-login → <span class="kbd">/dash/profile.html</span>.</li>
+          <li>Login en <span class="kbd">/auth/login.html</span> → guarda <span class="kbd">access</span>/<span class="kbd">refresh</span> en <i>localStorage</i>.</li>
+          <li>Perfil consulta <span class="kbd">/api/me</span> y <span class="kbd">/api/profiles?current=1</span>; permite <span class="kbd">PUT</span> del perfil y avatar URL.</li>
+        </ul>
+        <p class="muted">Nota: el frontend usa <span class="kbd">API = http://localhost:8001</span>; arrancar backend en ese puerto.</p>
+      </div>
+
+      <div class="card">
+        <h2>Cambios recientes (este sprint)</h2>
+        <ul>
+          <li><span class="ok">Ampliado</span> <span class="kbd">GET /api/me</span> para incluir <span class="kbd">email</span>.</li>
+          <li><span class="ok">Añadido</span> <span class="kbd">POST /api/register</span> (crea <i>User</i> y <i>UserProfile</i>, username=email).</li>
+          <li><span class="ok">Conectado</span> <span class="kbd">/auth/register.html</span> al endpoint y auto-login.</li>
+          <li><span class="ok">Limpieza</span> de rutas duplicadas en <span class="kbd">api/urls.py</span>.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Cómo probar</h2>
+        <ol>
+          <li>Backend: <span class="kbd">cd apps/api_django</span> y <span class="kbd">python manage.py runserver 0.0.0.0:8001</span>.</li>
+          <li>Frontend: abrir <span class="kbd">apps/web_html/auth/register.html</span> en el navegador, crear cuenta.</li>
+          <li>Verificar perfil en <span class="kbd">apps/web_html/dash/profile.html</span>.</li>
+          <li>Opcional: configurar <span class="kbd">DATABASE_URL</span> y ejecutar scripts de prueba de DB.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>Próximos pasos sugeridos</h2>
+        <ul>
+          <li>Conectar Postgres de Supabase y ejecutar migraciones.</li>
+          <li>Agregar validación/confirmación de email si aplica.</li>
+          <li>Perfiles: carga de avatar con archivo (no solo URL).</li>
+          <li>End-to-end tests básicos de auth y perfil.</li>
+        </ul>
+      </div>
+
+      <p class="muted">Para exportar a PDF: abre este archivo en el navegador y usa Imprimir → Guardar como PDF.</p>
+    </div>
+    <script>
+      document.getElementById('today').textContent = new Date().toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' });
+    </script>
+  </body>
+  </html>
+
+

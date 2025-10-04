@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stakeholders</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-6xl px-6 py-8">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold mb-4">Stakeholders</h1>
+      <table class="w-full text-sm">
+        <thead class="text-left text-[color:var(--text-secondary)]">
+          <tr>
+            <th class="py-2">ID</th>
+            <th class="py-2">Tipo</th>
+            <th class="py-2">Org</th>
+          </tr>
+        </thead>
+        <tbody id="actors-body">
+          <tr><td class="py-2" colspan="3">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      const API = 'http://localhost:8001';
+      async function loadActors(){
+        const tbody = document.getElementById('actors-body');
+        try{
+          const res = await fetch(`${API}/api/actors/`);
+          let data = await res.json();
+          if (!Array.isArray(data) && data?.value) data = data.value;
+          if (!Array.isArray(data)) data = [];
+          if (data.length === 0){ tbody.innerHTML = '<tr><td class="py-2" colspan="3">Sin stakeholders.</td></tr>'; return; }
+          tbody.innerHTML = data.map(a => `<tr class="border-t border-slate-200"><td class="py-2">${a.id}</td><td>${a.type}</td><td>${a.organization ?? ''}</td></tr>`).join('');
+        }catch(e){
+          tbody.innerHTML = '<tr><td class="py-2 text-red-600" colspan="3">Error cargando stakeholders</td></tr>';
+        }
+      }
+      loadActors();
+    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </body>
+  </html>

@@ -1,0 +1,17 @@
+:root{
+  /* WeWin brand - green + clean light surfaces */
+  --brand-primary:#2BB673;
+  --brand-secondary:#1E7A4A;
+  --brand-accent:#0EA5E9;
+  --brand-bg:#F8FAFC;
+  --brand-surface:#FFFFFF;
+  --text-primary:#0F172A;
+  --text-secondary:#475569;
+  --success:#22C55E;
+  --warning:#F59E0B;
+  --error:#EF4444;
+  --radius:16px;
+  --shadow:0 10px 24px rgba(2,6,23,0.12);
+}
+
+

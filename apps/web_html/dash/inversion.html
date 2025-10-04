@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inversión</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-5xl px-6 py-8 space-y-6">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold">Proyecto bancable</h1>
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Simular inversión</h2>
+        <form class="grid md:grid-cols-3 gap-2" hx-post="http://localhost:8001/api/investments/invest" hx-target="#portfolio" hx-swap="beforebegin">
+          <input name="investor" class="input" placeholder="actor_id inversor" required />
+          <input name="proyecto" class="input" placeholder="proyecto_id" required />
+          <input name="amount" type="number" min="100" step="10" class="input" placeholder="monto" required />
+          <button class="btn-primary">Invertir</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Portafolio</h2>
+        <div id="portfolio">Usa el botón de arriba o consulta con <code>?investor=ID</code>.</div>
+      </section>
+    </div>
+  </body>
+  </html>
+
+
+
+

@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('../../../packages/design/design_tokens.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply h-full;
+  }
+  body {
+    background-color: var(--brand-bg);
+    color: var(--text-primary);
+    font-family: theme('fontFamily.sans');
+  }
+  a { @apply text-[color:var(--brand-primary)]; }
+  /* Aplicar estilo de entrada por defecto a todos los formularios */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input:not([type]),
+  select,
+  textarea {
+    @apply px-3 py-2 rounded bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-primary)] focus:border-[color:var(--brand-primary)];
+  }
+}
+
+@layer components {
+  .card { @apply bg-[color:var(--brand-surface)] p-6 rounded shadow border border-slate-200; }
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded font-medium bg-[color:var(--brand-primary)] text-white hover:opacity-90 transition;
+  }
+  .badge-kpi {
+    @apply inline-flex items-center gap-2 text-sm px-3 py-1 rounded bg-[color:var(--brand-surface)] shadow;
+  }
+  .input {
+    @apply w-full px-3 py-2 rounded bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-primary)] focus:border-[color:var(--brand-primary)];
+  }
+}
+
+

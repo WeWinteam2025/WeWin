@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Energía</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
+      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <h1 class="text-2xl font-semibold">Mercado de Energía</h1>
+
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Publicar oferta (demo)</h2>
+        <form class="space-y-3" hx-post="http://localhost:8001/api/offers" hx-target="#offer-flash" hx-swap="innerHTML">
+          <input name="vendedor" placeholder="actor_id vendedor (opcional si hay login)" class="input" />
+          <input name="precio_ref" type="number" min="0" step="0.0001" placeholder="precio_ref" class="input" required />
+          <input name="capacidad_kw" type="number" min="0" step="0.01" placeholder="capacidad_kw" class="input" required />
+          <button class="btn-primary" hx-on::after-request="this.closest('form').reset(); htmx.trigger('#offers-public','load')">Crear oferta</button>
+        </form>
+        <div id="offer-flash" class="text-sm text-[color:var(--text-secondary)] mt-2"></div>
+      </section>
+
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Publicar demanda (demo)</h2>
+        <form class="space-y-3" hx-post="http://localhost:8001/api/demands" hx-target="#demand-flash" hx-swap="innerHTML">
+          <input name="comprador" placeholder="actor_id comprador (opcional si hay login)" class="input" />
+          <input name="precio_obj" type="number" min="0" step="0.0001" placeholder="precio_obj" class="input" required />
+          <button class="btn-primary" hx-on::after-request="this.closest('form').reset(); htmx.trigger('#offers-public','load')">Crear demanda</button>
+        </form>
+        <div id="demand-flash" class="text-sm text-[color:var(--text-secondary)] mt-2"></div>
+      </section>
+
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Ofertas públicas</h2>
+        <div id="offers-public" hx-get="http://localhost:8001/api/offers/public" hx-trigger="load" hx-swap="innerHTML">Cargando ofertas...</div>
+      </section>
+
+    </div>
+    <script>
+      // Adjunta Bearer a TODAS las requests HTMX
+      document.addEventListener('htmx:configRequest', (evt) => {
+        const token = localStorage.getItem('access');
+        if (token) {
+          evt.detail.headers['Authorization'] = 'Bearer ' + token;
+        }
+      });
+      // Feedback básico de error
+      document.addEventListener('htmx:responseError', (e) => {
+        const status = e.detail.xhr?.status;
+        if (status === 401) alert('No autenticado. Inicia sesión.');
+        else {
+          const tgt = e.detail.target || document.querySelector('#offer-flash');
+          if (tgt) tgt.innerHTML = '<span class="text-red-600">Error ' + status + ': ' + (e.detail.xhr?.responseText || '') + '</span>';
+        }
+      });
+      document.addEventListener('htmx:afterRequest', (e) => {
+        if (e.detail.successful) {
+          const id = (e.detail.elt.closest('form')?.getAttribute('hx-target')) || '#offer-flash';
+          const tgt = document.querySelector(id);
+          if (tgt) tgt.innerHTML = '<span class="text-green-600">Guardado correctamente</span>';
+        }
+      });
+    </script>
+  </body>
+  </html>
