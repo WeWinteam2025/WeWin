@@ -3,8 +3,9 @@ services:
     name: wewin-api
     env: python
     plan: starter
-    buildCommand: pip install -r apps/api_django/requirements.txt
-    startCommand: gunicorn config.wsgi:application --chdir apps/api_django --bind 0.0.0.0:$PORT
+    rootDir: apps/api_django
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /healthz
     envVars:
       - key: SECRET_KEY
@@ -17,12 +18,18 @@ services:
         sync: false
       - key: CORS_ALLOW_ALL_ORIGINS
         value: 'true'
+      - key: PYTHON_VERSION
+        value: 3.11.9
 
   - type: web
     name: wewin-web
     env: static
-    buildCommand: cd apps/web_html && npm install && npx vite build
-    staticPublishPath: apps/web_html/dist
+    rootDir: apps/web_html
+    buildCommand: npm ci && npx vite build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.3
     routes:
       - type: redirect
         source: /
