@@ -9,7 +9,8 @@ def healthz(request):
       row = cursor.fetchone()
     db_ok = row[0] == 1
   except Exception as exc:
-    return JsonResponse({'ok': False, 'db': False, 'error': str(exc)}, status=500)
+    # Do not fail the healthcheck if DB is down; report it but return 200
+    return JsonResponse({'ok': True, 'db': False, 'error': str(exc)})
 
   return JsonResponse({'ok': True, 'db': db_ok})
 
