@@ -11,6 +11,17 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-dev-secret-key')
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+# Auto-add Render external host if present
+RENDER_EXTERNAL_URL = os.getenv('RENDER_EXTERNAL_URL')
+if RENDER_EXTERNAL_URL:
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(RENDER_EXTERNAL_URL)
+        host = parsed.hostname
+        if host and host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(host)
+    except Exception:
+        pass
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,6 +102,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'true').lower() == 'true'
+
+# CSRF trusted origins for Render
+CSRF_TRUSTED_ORIGINS = []
+if RENDER_EXTERNAL_URL:
+    try:
+        CSRF_TRUSTED_ORIGINS.append(RENDER_EXTERNAL_URL)
+    except Exception:
+        pass
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
