@@ -53,7 +53,7 @@
             <button class="btn-primary" type="submit">Guardar Avatar</button>
           </form>
         </div>
-        <div id="flash" class="text-sm text-[color:var(--text-secondary)]"></div>
+      <div id="flash" class="text-sm text-[color:var(--text-secondary)]"></div>
       </div>
     </div>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
@@ -91,10 +91,17 @@
             });
             document.getElementById('profile-form').addEventListener('submit', async (e) => {
               e.preventDefault();
+              // Validación de stakeholder
+              const allowed = ['INVESTOR','ROOF_OWNER','BUYER','COMMUNITY','INSTALLER','IMPORTER','VENDOR','CONSULTANT',''];
+              const st = document.getElementById('stakeholder_type').value || '';
+              if (!allowed.includes(st)) {
+                alert('Tipo de Stakeholder inválido.');
+                return;
+              }
               const body = { ...profile,
                 first_name: document.getElementById('first_name').value,
                 last_name: document.getElementById('last_name').value,
-                stakeholder_type: document.getElementById('stakeholder_type').value,
+                stakeholder_type: st,
                 age: parseInt(document.getElementById('age').value || '0') || null,
                 city: document.getElementById('city').value,
                 country: document.getElementById('country').value,
