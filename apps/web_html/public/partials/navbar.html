@@ -1,0 +1,60 @@
+<header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
+  <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+      <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+    </div>
+    <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+      <a href="/" class="hover:opacity-80">Inicio</a>
+      <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+      <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+      <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
+      <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
+      <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
+      <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
+      <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
+      <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
+      <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+      <span id="auth-slot"></span>
+    </nav>
+  </div>
+</header>
+<script>
+  (function(){
+    const slot = document.getElementById('auth-slot');
+    const token = localStorage.getItem('access');
+    if (!slot) return;
+    if (!token) {
+      slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>';
+      return;
+    }
+    fetch((window.API_BASE || 'http://localhost:8001') + '/api/profiles/?current=1', { headers: { Authorization: 'Bearer ' + token }})
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        let profile = Array.isArray(data) ? data[0] : (data.value ? data.value[0] : null);
+        const avatar = (profile && profile.avatar_url) ? profile.avatar_url : 'https://www.gravatar.com/avatar/?d=identicon';
+        slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><img src="'+avatar+'" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"/></a>\n'+
+          '<button id="logout-btn" style="margin-left:8px" class="btn-primary">Salir</button>';
+        const btn = document.getElementById('logout-btn');
+        if (btn) {
+          btn.addEventListener('click', function(){
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            window.location.href = '/auth/login.html';
+          });
+        }
+      }).catch(()=>{
+        slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><div style="width:32px;height:32px;border-radius:50%;background:#9CA3AF;display:inline-block;vertical-align:middle"></div></a>'+ 
+          '<button id="logout-btn" style="margin-left:8px" class="btn-primary">Salir</button>';
+        const btn = document.getElementById('logout-btn');
+        if (btn) {
+          btn.addEventListener('click', function(){
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            window.location.href = '/auth/login.html';
+          });
+        }
+      });
+  })();
+</script>
+
+

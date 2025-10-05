@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>We Win • Dashboard</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
-      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
       <h1 class="text-2xl font-semibold">Dashboard</h1>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Catálogo (productos)</h2>
-        <form class="mb-4 space-y-2" hx-post="http://localhost:8001/api/products" hx-target="#products-flash" hx-swap="innerHTML">
+        <form class="mb-4 space-y-2" hx-post="" hx-target="#products-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/products');">
           <div class="grid md:grid-cols-4 gap-2">
             <input name="sku" placeholder="SKU" required />
             <input name="precio" type="number" min="0" step="0.01" placeholder="Precio" required />
@@ -23,12 +24,12 @@
           </div>
         </form>
         <div id="products-flash" class="text-sm text-[color:var(--text-secondary)] mb-2"></div>
-        <div id="products-list" hx-get="http://localhost:8001/api/products" hx-trigger="load" hx-swap="innerHTML">Cargando productos...</div>
+        <div id="products-list" hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/products')">Cargando productos...</div>
       </section>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Órdenes de trabajo</h2>
-        <form class="mb-4 space-y-2" hx-post="http://localhost:8001/api/workorders" hx-target="#workorders-flash" hx-swap="innerHTML">
+        <form class="mb-4 space-y-2" hx-post="" hx-target="#workorders-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/workorders');">
           <div class="grid md:grid-cols-4 gap-2">
             <input name="instalador" placeholder="actor_id instalador" required />
             <input name="proyecto" placeholder="proyecto_id" required />
@@ -37,17 +38,17 @@
           </div>
         </form>
         <div id="workorders-flash" class="text-sm text-[color:var(--text-secondary)] mb-2"></div>
-        <div id="workorders-list" hx-get="http://localhost:8001/api/workorders" hx-trigger="load" hx-swap="innerHTML">Cargando órdenes...</div>
+        <div id="workorders-list" hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/workorders')">Cargando órdenes...</div>
       </section>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Comunidad Energética</h2>
-        <div hx-get="http://localhost:8001/api/ce" hx-trigger="load" hx-swap="innerHTML">Cargando CE...</div>
+        <div hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/ce')">Cargando CE...</div>
       </section>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Paquetes de consultoría</h2>
-        <div hx-get="http://localhost:8001/api/consulting/packages" hx-trigger="load" hx-swap="innerHTML">Cargando paquetes...</div>
+        <div hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/consulting/packages')">Cargando paquetes...</div>
       </section>
     </div>
   </body>

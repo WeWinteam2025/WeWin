@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Energía</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
-      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
       <h1 class="text-2xl font-semibold">Mercado de Energía</h1>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Publicar oferta (demo)</h2>
-        <form class="space-y-3" hx-post="http://localhost:8001/api/offers" hx-target="#offer-flash" hx-swap="innerHTML">
+        <form class="space-y-3" hx-post="" hx-target="#offer-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/offers');">
           <input name="vendedor" placeholder="actor_id vendedor (opcional si hay login)" class="input" />
           <input name="precio_ref" type="number" min="0" step="0.0001" placeholder="precio_ref" class="input" required />
           <input name="capacidad_kw" type="number" min="0" step="0.01" placeholder="capacidad_kw" class="input" required />
@@ -25,7 +26,7 @@
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Publicar demanda (demo)</h2>
-        <form class="space-y-3" hx-post="http://localhost:8001/api/demands" hx-target="#demand-flash" hx-swap="innerHTML">
+        <form class="space-y-3" hx-post="" hx-target="#demand-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/demands');">
           <input name="comprador" placeholder="actor_id comprador (opcional si hay login)" class="input" />
           <input name="precio_obj" type="number" min="0" step="0.0001" placeholder="precio_obj" class="input" required />
           <button class="btn-primary" hx-on::after-request="this.closest('form').reset(); htmx.trigger('#offers-public','load')">Crear demanda</button>
@@ -35,7 +36,7 @@
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Ofertas públicas</h2>
-        <div id="offers-public" hx-get="http://localhost:8001/api/offers/public" hx-trigger="load" hx-swap="innerHTML">Cargando ofertas...</div>
+        <div id="offers-public" hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/offers/public')">Cargando ofertas...</div>
       </section>
 
     </div>

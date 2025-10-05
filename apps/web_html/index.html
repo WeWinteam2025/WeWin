@@ -10,16 +10,7 @@
   </head>
   <body class="min-h-screen bg-[color:var(--brand-bg)]">
     <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
-      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
-          <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
-        </div>
-        <nav class="flex items-center gap-4 text-sm">
-          <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
-          <a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>
-          <a href="/auth/register.html" class="btn-primary">Comenzar</a>
-        </nav>
-      </div>
+      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
     </header>
     <main>
       <section class="mx-auto max-w-5xl px-6 py-20 text-center">
