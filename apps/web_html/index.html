@@ -28,7 +28,40 @@
           <span id="auth-slot"></span>
         </nav>
       </div>
-      <script src="/navbar-init.js"></script>
+      <script>
+        (function(){
+          function renderAuth(){
+            var slot = document.getElementById('auth-slot');
+            if (!slot) return;
+            var token = localStorage.getItem('access');
+            if (!token){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; return; }
+            var API = window.API_BASE || 'http://localhost:8001';
+            fetch(API + '/api/me', { headers: { Authorization: 'Bearer ' + token }})
+              .then(function(r){ return r.ok ? r.json() : null; })
+              .then(function(me){
+                var avatar = (me && me.avatar_url) ? me.avatar_url : 'https://www.gravatar.com/avatar/?d=identicon';
+                slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><img src="'+avatar+'" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"/></a>'+
+                  '<button id="logout-btn" style="margin-left:8px" class="btn-primary">Salir</button>';
+                var btn = document.getElementById('logout-btn');
+                if (btn) btn.addEventListener('click', function(){
+                  localStorage.removeItem('access');
+                  localStorage.removeItem('refresh');
+                  window.location.href = '/auth/login.html';
+                });
+              }).catch(function(){
+                slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><div style="width:32px;height:32px;border-radius:50%;background:#9CA3AF;display:inline-block;vertical-align:middle"></div></a>'+
+                  '<button id="logout-btn" style="margin-left:8px" class="btn-primary">Salir</button>';
+                var btn = document.getElementById('logout-btn');
+                if (btn) btn.addEventListener('click', function(){
+                  localStorage.removeItem('access');
+                  localStorage.removeItem('refresh');
+                  window.location.href = '/auth/login.html';
+                });
+              });
+          }
+          document.addEventListener('DOMContentLoaded', renderAuth);
+        })();
+      </script>
     </header>
     <main>
       <!-- Hero orientado a comunidad solar -->
