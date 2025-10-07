@@ -30,7 +30,28 @@
         <h2>Seguridad</h2>
         <p>Capacita al personal en trabajos en altura, bloqueo/etiquetado y primeros auxilios. Mantén planes de emergencia actualizados.</p>
       </div>
+      <hr class="my-8"/>
+      <section class="mt-8">
+        <h2 class="text-xl font-semibold mb-4">También te puede interesar</h2>
+        <div id="related" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
     </article>
+    <script>
+      (function(){
+        var current = 'instaladores-calidad';
+        var posts = [
+          { slug:'comunidad-solar', title:'¿Qué es una comunidad de energía solar?', img:'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop' },
+          { slug:'ppa-para-pymes', title:'PPA para PYMES', img:'https://images.unsplash.com/photo-1526498460520-4c246339dccb?q=80&w=1600&auto=format&fit=crop' },
+          { slug:'instaladores-calidad', title:'Instaladores: calidad y trazabilidad', img:'https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=1600&auto=format&fit=crop' },
+          { slug:'financiacion-proyectos', title:'Financiación de proyectos solares', img:'https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1600&auto=format&fit=crop' }
+        ];
+        var related = posts.filter(function(p){ return p.slug !== current; }).slice(0,3);
+        var grid = document.getElementById('related');
+        grid.innerHTML = related.map(function(p){
+          return '\n          <a class=\"group block rounded-xl overflow-hidden border border-slate-200 bg-[color:var(--brand-surface)] shadow hover:shadow-lg transition\" href=\"/blog/'+p.slug+'.html\">\n            <div class=\"relative aspect-[16/9] overflow-hidden\">\n              <img class=\"w-full h-full object-cover group-hover:scale-[1.03] transition\" src=\"'+p.img+'\" alt=\"'+p.title+'\"/>\n              <div class=\"absolute inset-0 bg-gradient-to-t from-black/40 to-transparent\"></div>\n            </div>\n            <div class=\"p-4\">\n              <h3 class=\"text-lg font-semibold\">'+p.title+'</h3>\n            </div>\n          </a>';
+        }).join('');
+      })();
+    </script>
   </body>
   </html>
 
