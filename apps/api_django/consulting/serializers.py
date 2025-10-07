@@ -22,3 +22,4 @@ class ConsultingContractSerializer(serializers.ModelSerializer):
 
 
 
+

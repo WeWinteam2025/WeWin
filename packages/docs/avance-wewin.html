@@ -161,6 +161,31 @@ CORS_ALLOW_ALL_ORIGINS=true</pre>
       </div>
 
       <div class="card">
+        <h2>Despliegue (Render + Supabase)</h2>
+        <ul>
+          <li>Backend en Render usando <span class="kbd">render.yaml</span> (raíz o <span class="kbd">deploy/render.yaml</span>).</li>
+          <li>Configurar variables de entorno: <span class="kbd">SECRET_KEY</span>, <span class="kbd">DEBUG=false</span>, <span class="kbd">ALLOWED_HOSTS</span>, <span class="kbd">DATABASE_URL</span>, <span class="kbd">CORS_*</span>.</li>
+          <li>Usar SSL en Postgres (Supabase) y ejecutar migraciones en el primer deploy.</li>
+        </ul>
+        <h3>.env de producción (ejemplo)</h3>
+        <pre>SECRET_KEY=... 
+DEBUG=false
+ALLOWED_HOSTS=*
+DATABASE_URL=postgresql://postgres:D311332m@db.qgsmxnecxjwjutomiomw.supabase.co:5432/postgres?sslmode=require
+CORS_ALLOW_ALL_ORIGINS=false
+CORS_ALLOWED_ORIGINS=https://tu-dominio.com</pre>
+        <h3>Comandos iniciales (primera vez)</h3>
+        <pre>python manage.py migrate
+python manage.py createsuperuser
+python manage.py collectstatic --noinput
+# opcional: datos demo
+python manage.py seed_demo --flush</pre>
+        <h3>Frontend</h3>
+        <p>Definir base de la API en <span class="kbd">apps/web_html/public/config.js</span>:</p>
+        <pre>window.API_BASE = 'https://tu-backend.onrender.com';</pre>
+      </div>
+
+      <div class="card">
         <h2>Próximos pasos sugeridos</h2>
         <ul>
           <li>Conectar Postgres de Supabase y ejecutar migraciones.</li>

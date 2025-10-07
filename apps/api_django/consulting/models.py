@@ -22,3 +22,4 @@ class ConsultingContract(models.Model):
 
 
 
+

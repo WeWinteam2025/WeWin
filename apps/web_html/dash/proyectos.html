@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Proyectos</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
@@ -22,12 +23,46 @@
   </body>
 </html>
 <script>
-  const API = 'http://localhost:8001';
+  const API = window.API_BASE || 'http://localhost:8001';
+  function renderInlineLogin(targetId, onSuccess){
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    el.innerHTML = `
+      <div class=\"max-w-md\"> 
+        <p class=\"mb-3\">Inicia sesión para ver proyectos.</p>
+        <form id=\"inline-login\" class=\"space-y-3\">
+          <div>
+            <label class=\"block text-sm mb-1\">Usuario o email</label>
+            <input id=\"inline-user\" class=\"input\" placeholder=\"demo\" />
+          </div>
+          <div>
+            <label class=\"block text-sm mb-1\">Contraseña</label>
+            <input id=\"inline-pass\" type=\"password\" class=\"input\" placeholder=\"••••••\" />
+          </div>
+          <button class=\"btn-primary\" type=\"submit\">Entrar</button>
+        </form>
+      </div>`;
+    const form = document.getElementById('inline-login');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('inline-user').value;
+      const password = document.getElementById('inline-pass').value;
+      try {
+        const res = await fetch(`${API}/api/token/`, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ username, password }) });
+        const data = await res.json();
+        if (res.ok && data.access) {
+          localStorage.setItem('access', data.access);
+          if (data.refresh) localStorage.setItem('refresh', data.refresh);
+          if (typeof onSuccess === 'function') onSuccess();
+        } else { alert('Credenciales inválidas'); }
+      } catch(err){ alert('Error de red'); }
+    });
+  }
   async function loadProjects() {
     const target = document.getElementById('projects-grid');
     try {
       const token = localStorage.getItem('access');
-      if (!token) { target.innerHTML = 'Inicia sesión para ver proyectos.'; return; }
+      if (!token) { renderInlineLogin('projects-grid', loadProjects); return; }
       const res = await fetch(`${API}/api/projects/`, { headers: { 'Authorization': `Bearer ${token}` }});
       if (!res.ok) {
         if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver proyectos.'; return; }

@@ -22,10 +22,10 @@ def me(request):
 @permission_classes([])
 def register(request):
     data = request.data or {}
-    email = (data.get('email') or '').strip()
+    email = (data.get('email') or '').strip().lower()
     password = (data.get('password') or '').strip()
     # We align username with email so the existing login form works
-    username = (data.get('username') or '').strip() or email
+    username = (data.get('username') or '').strip().lower() or email
     first_name = (data.get('first_name') or '').strip()
     last_name = (data.get('last_name') or '').strip()
 

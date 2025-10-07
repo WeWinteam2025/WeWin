@@ -102,9 +102,23 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'true').lower() == 'true'
+# Allowlist for production
+_cors_allowed = os.getenv('CORS_ALLOWED_ORIGINS')
+if _cors_allowed:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_allowed.split(',') if o.strip()]
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_CREDENTIALS = True
 
-# CSRF trusted origins for Render
+# Allow specific origins via env when not allowing all
+cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_allowed_origins_env:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in cors_allowed_origins_env.split(',') if o.strip()]
+
+# CSRF trusted origins from env and Render
 CSRF_TRUSTED_ORIGINS = []
+csrf_trusted_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if csrf_trusted_env:
+    CSRF_TRUSTED_ORIGINS.extend([o.strip() for o in csrf_trusted_env.split(',') if o.strip()])
 if RENDER_EXTERNAL_URL:
     try:
         CSRF_TRUSTED_ORIGINS.append(RENDER_EXTERNAL_URL)

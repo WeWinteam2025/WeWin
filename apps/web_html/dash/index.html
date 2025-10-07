@@ -9,8 +9,28 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
+    <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
+      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+          <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+        </div>
+        <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+          <a href="/" class="hover:opacity-80">Inicio</a>
+          <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+          <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+          <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
+          <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
+          <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
+          <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
+          <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
+          <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
+          <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+          <span id="auth-slot"></span>
+        </nav>
+      </div>
+      <script src="/navbar-init.js"></script>
+    </header>
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
-      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
       <h1 class="text-2xl font-semibold">Dashboard</h1>
 
       <section class="card">

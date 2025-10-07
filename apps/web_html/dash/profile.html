@@ -8,8 +8,9 @@
     <script src="/config.js"></script>
   </head>
   <body class="min-h-screen">
+    <div id="navbar-slot"></div>
+    <script src="/navbar-loader.js"></script>
     <div class="mx-auto max-w-3xl px-6 py-8 space-y-6">
-      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
       <h1 class="text-2xl font-semibold">Perfil</h1>
       <div class="card space-y-4">
         <div class="flex items-center gap-4">

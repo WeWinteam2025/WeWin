@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catálogo</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
@@ -23,7 +24,7 @@
       <section class="grid md:grid-cols-3 gap-4" id="grid">Cargando...</section>
     </div>
     <script>
-      const API = 'http://localhost:8001';
+      const API = window.API_BASE || 'http://localhost:8001';
       async function loadCatalog(){
         const params = new URLSearchParams();
         if (f_marca.value) params.append('marca', f_marca.value);

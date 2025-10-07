@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>We Win • PPA</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
@@ -14,15 +15,15 @@
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Paso 1: Seleccionar oferta</h2>
-        <div id="step1" hx-get="http://localhost:8001/api/offers/public" hx-trigger="load" hx-swap="innerHTML">Cargando ofertas...</div>
+        <div id="step1" hx-get="" hx-trigger="load" hx-swap="innerHTML"></div>
       </section>
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Paso 2: Seleccionar demanda</h2>
-        <div id="step2" hx-get="http://localhost:8001/api/demands/public" hx-trigger="load" hx-swap="innerHTML">Cargando demandas...</div>
+        <div id="step2" hx-get="" hx-trigger="load" hx-swap="innerHTML"></div>
       </section>
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Paso 3: Crear contrato</h2>
-        <form class="space-y-3" hx-post="http://localhost:8001/api/demands/ppa/create" hx-target="#ppa-flash" hx-swap="innerHTML">
+        <form class="space-y-3" hx-post="" hx-target="#ppa-flash" hx-swap="innerHTML">
           <div class="grid md:grid-cols-3 gap-2">
             <input name="offer_id" placeholder="offer_id" required />
             <input name="demand_id" placeholder="demand_id" required />
@@ -44,7 +45,15 @@
       </section>
     </div>
     <script>
-      const API = 'http://localhost:8001';
+      const API = window.API_BASE || 'http://localhost:8001';
+      // set dynamic endpoints after DOM ready
+      window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('step1').setAttribute('hx-get', `${API}/api/offers/public`);
+        document.getElementById('step2').setAttribute('hx-get', `${API}/api/demands/public`);
+        document.querySelector('form[ hx-target="#ppa-flash"]').setAttribute('hx-post', `${API}/api/demands/ppa/create`);
+        htmx.trigger('#step1','load');
+        htmx.trigger('#step2','load');
+      });
       document.addEventListener('htmx:configRequest', (evt) => {
         const token = localStorage.getItem('access');
         if (token) evt.detail.headers['Authorization'] = 'Bearer ' + token;

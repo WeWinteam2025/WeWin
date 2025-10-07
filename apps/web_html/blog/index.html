@@ -8,39 +8,101 @@
     <script src="/config.js"></script>
   </head>
   <body class="min-h-screen">
-    <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur sticky top-0 z-50">
-      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-        <div class="text-xl font-semibold">WeWin</div>
-        <nav class="flex items-center gap-4 text-sm">
-          <a href="/" class="hover:opacity-80">Inicio</a>
-          <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
-          <span id="auth-slot"></span>
-        </nav>
+    <div id="navbar-slot"></div>
+    <script src="/navbar-loader.js"></script>
+    <main class="mx-auto max-w-7xl px-6 py-10 space-y-8">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight">Noticias</h1>
+          <p class="text-[color:var(--text-secondary)]">Tendencias, guías y casos sobre energía solar distribuida.</p>
+        </div>
+        <div class="hidden md:block">
+          <input id="search" type="text" placeholder="Buscar en el blog..." class="input w-80"/>
+        </div>
       </div>
-      <script src="/navbar-init.js"></script>
-    </header>
-    <main class="mx-auto max-w-6xl px-6 py-10 space-y-6">
-      <h1 class="text-2xl font-semibold">Blog</h1>
-      <div class="grid md:grid-cols-2 gap-4">
-        <a class="card block" href="/blog/comunidad-solar.html">
-          <div class="text-xl font-semibold mb-1">¿Qué es una comunidad de energía solar?</div>
-          <div class="text-[color:var(--text-secondary)]">Modelos, ventajas y participación de los stakeholders.</div>
+
+      <section>
+        <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+
+      <template id="card-tpl">
+        <a class="group block rounded-xl overflow-hidden border border-slate-200 bg-[color:var(--brand-surface)] shadow hover:shadow-lg transition" href="#">
+          <div class="relative aspect-[16/9] overflow-hidden">
+            <img class="w-full h-full object-cover group-hover:scale-[1.03] transition" src="" alt=""/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <div class="absolute bottom-2 left-2 text-xs bg-black/50 text-white px-2 py-1 rounded">Artículo</div>
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-semibold mb-1"></h3>
+            <p class="text-sm text-[color:var(--text-secondary)]"></p>
+          </div>
         </a>
-        <a class="card block" href="/blog/ppa-para-pymes.html">
-          <div class="text-xl font-semibold mb-1">PPA para PYMES</div>
-          <div class="text-[color:var(--text-secondary)]">Cómo acceder a energía más barata y limpia.</div>
-        </a>
-        <a class="card block" href="/blog/instaladores-calidad.html">
-          <div class="text-xl font-semibold mb-1">Instaladores: calidad y trazabilidad</div>
-          <div class="text-[color:var(--text-secondary)]">Buenas prácticas y monitoreo.</div>
-        </a>
-        <a class="card block" href="/blog/financiacion-proyectos.html">
-          <div class="text-xl font-semibold mb-1">Financiación de proyectos solares</div>
-          <div class="text-[color:var(--text-secondary)]">Estructuras típicas y métricas clave.</div>
-        </a>
-      </div>
+      </template>
+
+      <script>
+        (function(){
+          var posts = [
+            {
+              slug: 'comunidad-solar',
+              title: '¿Qué es una comunidad de energía solar?',
+              desc: 'Modelos, ventajas y participación de los stakeholders en América Latina.',
+              img: 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop'
+            },
+            {
+              slug: 'ppa-para-pymes',
+              title: 'PPA para PYMES',
+              desc: 'Cómo acceder a energía más barata y limpia con contratos a largo plazo.',
+              img: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?q=80&w=1600&auto=format&fit=crop'
+            },
+            {
+              slug: 'instaladores-calidad',
+              title: 'Instaladores: calidad y trazabilidad',
+              desc: 'Buenas prácticas de instalación y monitoreo de producción.',
+              img: 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop'
+            },
+            {
+              slug: 'financiacion-proyectos',
+              title: 'Financiación de proyectos solares',
+              desc: 'Estructuras típicas, riesgos y métricas clave para inversionistas.',
+              img: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1600&auto=format&fit=crop'
+            }
+          ];
+
+          var grid = document.getElementById('grid');
+          var tpl = document.getElementById('card-tpl');
+          function render(list){
+            grid.innerHTML = '';
+            list.forEach(function(p){
+              var node = tpl.content.cloneNode(true);
+              var a = node.querySelector('a');
+              var img = node.querySelector('img');
+              var h3 = node.querySelector('h3');
+              var desc = node.querySelector('p');
+              a.href = '/blog/' + p.slug + '.html';
+              img.src = p.img;
+              img.alt = p.title;
+              h3.textContent = p.title;
+              desc.textContent = p.desc;
+              grid.appendChild(node);
+            });
+          }
+          render(posts);
+
+          var search = document.getElementById('search');
+          if (search){
+            search.addEventListener('input', function(){
+              var q = this.value.toLowerCase();
+              var filtered = posts.filter(function(p){
+                return p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+              });
+              render(filtered);
+            });
+          }
+        })();
+      </script>
     </main>
   </body>
   </html>
+
 
 
