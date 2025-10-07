@@ -181,6 +181,19 @@ class Command(BaseCommand):
         cB, _ = Contract.objects.get_or_create(tipo='PPA', proyecto=pds, tarifa=0.2050, vigencia='2025-2031')
         cB.partes.set([buyerB.id, vend2.id])
 
+        # ===== Catálogo de 12 empresas compradoras (reales en el mercado colombiano) =====
+        companies = [
+            'Grupo Éxito', 'Alpina', 'Postobón', 'Bavaria', 'Cementos Argos', 'Grupo Nutresa',
+            'Bancolombia', 'Avianca', 'Carvajal', 'PepsiCo Colombia', 'Nestlé Colombia', 'Claro Colombia'
+        ]
+        for name in companies:
+            uname = name.lower().replace(' ', '').replace('ó','o').replace('é','e').replace('á','a').replace('í','i').replace('ú','u').replace('ñ','n')
+            ucmp, _ = User.objects.get_or_create(username=uname, defaults={'email': f'{uname}@example.com'})
+            if not ucmp.has_usable_password():
+                ucmp.set_password('demo'); ucmp.save()
+            buyer, _ = Actor.objects.get_or_create(user=ucmp, type='BUYER')
+            EnergyDemand.objects.get_or_create(comprador=buyer, defaults={'precio_obj': 0.22})
+
         self.stdout.write(self.style.SUCCESS('Seeded demo data'))
 
 
