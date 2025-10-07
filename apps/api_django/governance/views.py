@@ -6,7 +6,11 @@ from .serializers import CommunityEnergySerializer, VotingSerializer
 class CommunityEnergyViewSet(viewsets.ModelViewSet):
     queryset = CommunityEnergy.objects.all()
     serializer_class = CommunityEnergySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # Lectura pública para listar comunidades
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
 
 class VotingViewSet(viewsets.ModelViewSet):

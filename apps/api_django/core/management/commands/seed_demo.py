@@ -149,8 +149,8 @@ class Command(BaseCommand):
         if prod:
             B2BOrder.objects.get_or_create(comprador=actors['INSTALLER'], producto=prod, defaults={'cantidad': 2, 'total': prod.precio * 2, 'proforma': {'producto': prod.sku, 'cantidad': 2}})
 
-        # Governance CE + Voting
-        ce, _ = CommunityEnergy.objects.get_or_create(organizacion=org, defaults={'reglas': {'quorum': 50}})
+        # Governance CE + Voting (principal)
+        ce, _ = CommunityEnergy.objects.get_or_create(organizacion=org, defaults={'reglas': {'quorum': 50}, 'nombre': 'CE We Win', 'ciudad': 'Bogotá', 'barrio': 'Chapinero', 'historia': 'Comunidad piloto enfocada en educación y medición transparente.', 'fotos_miembros': []})
         Voting.objects.get_or_create(ce=ce, asunto='Tarifa 2026', defaults={'opciones': ['Mantener', 'Subir 5%'], 'quorum': 50})
 
         # Consulting
@@ -207,6 +207,34 @@ class Command(BaseCommand):
             panels, capex = calc_panels_and_capex(float(proj.potencia_kw))
             # Guardar en terms de un contrato dummy o metadata vía Wallet/Investment? Usamos Investment como proxy
             Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': capex, 'expected_irr': 12})
+
+        # ===== 5 Comunidades Energéticas en diferentes ciudades =====
+        faces = [
+            'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?q=80&w=400&auto=format',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format',
+            'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=400&auto=format',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format',
+        ]
+        ce_data = [
+            ('Comunidad Soledad Solar', 'Barranquilla', 'Soledad', '10 hogares se unieron para reducir su factura y vender excedentes al parque industrial cercano.'),
+            ('Sol de Laureles', 'Medellín', 'Laureles', 'Vecinos organizaron compras conjuntas de paneles y ahora comercializan energía en horas de alta irradiación.'),
+            ('Techos Verdes de Salitre', 'Bogotá', 'Salitre', 'Con apoyo del colegio local, instalaron monitoreo comunitario y educación para niños.'),
+            ('Cali Brilla', 'Cali', 'Ciudad Jardín', 'Barrio residencial con techos amplios; optimizan autoconsumo y suben excedentes en PPA.'),
+            ('Eje Solar Pereira', 'Pereira', 'Pinares', 'Comunidad piloto de 12 casas que migró a medición inteligente y venta a comercios.'),
+        ]
+        for i, (nombre, ciudad, barrio, historia) in enumerate(ce_data):
+            CommunityEnergy.objects.get_or_create(
+                nombre=nombre,
+                ciudad=ciudad,
+                barrio=barrio,
+                defaults={
+                    'organizacion': org,
+                    'reglas': {'quorum': 50},
+                    'historia': historia,
+                    'fotos_miembros': faces + faces,  # al menos 10 rostros
+                }
+            )
 
 
         # ===== Catálogo de 12 empresas compradoras (reales en el mercado colombiano) =====
