@@ -55,7 +55,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class MeasurementViewSet(viewsets.ModelViewSet):
     queryset = Measurement.objects.all()
     serializer_class = MeasurementSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # Lectura pública; escritura autenticada
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         qs = super().get_queryset()
