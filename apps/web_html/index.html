@@ -109,37 +109,62 @@
         <div id="projects-active" class="grid md:grid-cols-3 gap-4">Cargando proyectos…</div>
       </section>
 
-      <!-- Noticias / Blog -->
+      <!-- Noticias / Blog - Hero Slider -->
       <section class="mx-auto max-w-6xl px-6 pb-16">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-2xl font-semibold">Noticias</h2>
           <a href="/blog/index.html" class="hover:opacity-80 text-sm">Ver blog</a>
         </div>
-        <div class="relative">
-          <div id="news-track" class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
-            <a class="card block min-w-[320px] snap-start" href="/blog/comunidad-solar.html">
-              <img src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop" alt="Comunidad solar" class="w-full h-40 object-cover rounded mb-3"/>
-              <div class="text-xl font-semibold mb-1">¿Qué es una comunidad de energía solar?</div>
-              <div class="text-[color:var(--text-secondary)]">Modelos, ventajas y participación de los stakeholders en América Latina.</div>
+        <div id="news-slider" class="relative">
+          <div id="news-track" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth rounded-xl shadow-lg">
+            <!-- Slide 1 -->
+            <a href="/blog/comunidad-solar.html" class="relative min-w-full h-[360px] md:h-[420px] snap-start group">
+              <img src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=2000&auto=format&fit=crop" alt="Comunidad solar" class="absolute inset-0 w-full h-full object-cover"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                <span class="inline-block text-xs uppercase tracking-wider opacity-80">Blog</span>
+                <h3 class="text-2xl md:text-3xl font-semibold leading-snug">¿Qué es una comunidad de energía solar?</h3>
+                <p class="mt-2 max-w-3xl opacity-90">Modelos, ventajas y participación de los stakeholders en América Latina.</p>
+                <span class="inline-flex mt-4 items-center gap-2 px-3 py-1.5 rounded bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20">Leer artículo →</span>
+              </div>
             </a>
-            <a class="card block min-w-[320px] snap-start" href="/blog/ppa-para-pymes.html">
-              <img src="https://images.unsplash.com/photo-1497171156020-8f58f5f62b78?q=80&w=1600&auto=format&fit=crop" alt="PPA para PYMES" class="w-full h-40 object-cover rounded mb-3"/>
-              <div class="text-xl font-semibold mb-1">PPA para PYMES</div>
-              <div class="text-[color:var(--text-secondary)]">Cómo acceder a energía limpia con contratos a largo plazo.</div>
+            <!-- Slide 2 -->
+            <a href="/blog/ppa-para-pymes.html" class="relative min-w-full h-[360px] md:h-[420px] snap-start group">
+              <img src="https://images.unsplash.com/photo-1497171156020-8f58f5f62b78?q=80&w=2000&auto=format&fit=crop" alt="PPA para PYMES" class="absolute inset-0 w-full h-full object-cover"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                <span class="inline-block text-xs uppercase tracking-wider opacity-80">Guía</span>
+                <h3 class="text-2xl md:text-3xl font-semibold leading-snug">PPA para PYMES</h3>
+                <p class="mt-2 max-w-3xl opacity-90">Cómo acceder a energía limpia con contratos a largo plazo.</p>
+                <span class="inline-flex mt-4 items-center gap-2 px-3 py-1.5 rounded bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20">Leer artículo →</span>
+              </div>
             </a>
-            <a class="card block min-w-[320px] snap-start" href="/blog/instaladores-calidad.html">
-              <img src="https://images.unsplash.com/photo-1523861751938-8b4bd3d2ef5d?q=80&w=1600&auto=format&fit=crop" alt="Instaladores" class="w-full h-40 object-cover rounded mb-3"/>
-              <div class="text-xl font-semibold mb-1">Instaladores: calidad y trazabilidad</div>
-              <div class="text-[color:var(--text-secondary)]">Buenas prácticas de instalación y monitoreo.</div>
+            <!-- Slide 3 -->
+            <a href="/blog/instaladores-calidad.html" class="relative min-w-full h-[360px] md:h-[420px] snap-start group">
+              <img src="https://images.unsplash.com/photo-1523861751938-8b4bd3d2ef5d?q=80&w=2000&auto=format&fit=crop" alt="Instaladores" class="absolute inset-0 w-full h-full object-cover"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                <span class="inline-block text-xs uppercase tracking-wider opacity-80">Buenas prácticas</span>
+                <h3 class="text-2xl md:text-3xl font-semibold leading-snug">Instaladores: calidad y trazabilidad</h3>
+                <p class="mt-2 max-w-3xl opacity-90">Buenas prácticas de instalación y monitoreo.</p>
+                <span class="inline-flex mt-4 items-center gap-2 px-3 py-1.5 rounded bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20">Leer artículo →</span>
+              </div>
             </a>
-            <a class="card block min-w-[320px] snap-start" href="/blog/financiacion-proyectos.html">
-              <img src="https://images.unsplash.com/photo-1461344577544-4e5dc9487184?q=80&w=1600&auto=format&fit=crop" alt="Financiación" class="w-full h-40 object-cover rounded mb-3"/>
-              <div class="text-xl font-semibold mb-1">Financiación de proyectos solares</div>
-              <div class="text-[color:var(--text-secondary)]">Estructuras típicas, riesgos y métricas clave.</div>
+            <!-- Slide 4 -->
+            <a href="/blog/financiacion-proyectos.html" class="relative min-w-full h-[360px] md:h-[420px] snap-start group">
+              <img src="https://images.unsplash.com/photo-1461344577544-4e5dc9487184?q=80&w=2000&auto=format&fit=crop" alt="Financiación" class="absolute inset-0 w-full h-full object-cover"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                <span class="inline-block text-xs uppercase tracking-wider opacity-80">Finanzas</span>
+                <h3 class="text-2xl md:text-3xl font-semibold leading-snug">Financiación de proyectos solares</h3>
+                <p class="mt-2 max-w-3xl opacity-90">Estructuras típicas, riesgos y métricas clave.</p>
+                <span class="inline-flex mt-4 items-center gap-2 px-3 py-1.5 rounded bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20">Leer artículo →</span>
+              </div>
             </a>
           </div>
-          <button id="news-prev" class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow border border-slate-200 absolute -left-4 top-1/2 -translate-y-1/2">‹</button>
-          <button id="news-next" class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow border border-slate-200 absolute -right-4 top-1/2 -translate-y-1/2">›</button>
+          <button id="news-prev" class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow border border-slate-200 absolute left-3 top-1/2 -translate-y-1/2">‹</button>
+          <button id="news-next" class="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow border border-slate-200 absolute right-3 top-1/2 -translate-y-1/2">›</button>
+          <div id="news-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2"></div>
         </div>
       </section>
     </main>
@@ -186,6 +211,27 @@
           }
         }
         loadActiveProjects();
+
+        // Noticias slider controls + dots
+        const track = document.getElementById('news-track');
+        const prev = document.getElementById('news-prev');
+        const next = document.getElementById('news-next');
+        const dots = document.getElementById('news-dots');
+        if (track && dots){
+          const slides = Array.from(track.querySelectorAll('a.min-w-full'));
+          dots.innerHTML = slides.map((_,i)=>`<button data-i="${i}" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/70"></button>`).join('');
+          function snapTo(idx){
+            const w = track.clientWidth;
+            track.scrollTo({ left: w*idx, behavior: 'smooth' });
+            Array.from(dots.children).forEach((d,di)=>{ d.style.background = di===idx ? 'white' : 'rgba(255,255,255,0.4)'; });
+          }
+          let current = 0; snapTo(0);
+          if (prev) prev.addEventListener('click', ()=>{ current = Math.max(0, current-1); snapTo(current); });
+          if (next) next.addEventListener('click', ()=>{ current = Math.min(slides.length-1, current+1); snapTo(current); });
+          dots.addEventListener('click', (e)=>{ const b=e.target.closest('button[data-i]'); if (b){ current = parseInt(b.dataset.i,10)||0; snapTo(current);} });
+          // Auto-advance
+          setInterval(()=>{ current = (current+1)%slides.length; snapTo(current); }, 7000);
+        }
       })();
     </script>
   </body>
