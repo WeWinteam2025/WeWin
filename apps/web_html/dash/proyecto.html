@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/src/style.css" />
     <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body class="min-h-screen">
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-6">
@@ -19,6 +20,10 @@
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Resumen económico</h2>
         <div id="econ">Cargando...</div>
+      </section>
+      <section class="card">
+        <h2 class="text-lg font-semibold mb-3">Rendimiento histórico</h2>
+        <canvas id="perfChart" height="120"></canvas>
       </section>
     </div>
     <script>
@@ -95,6 +100,15 @@
               </tbody>
             </table>
           </div>`;
+        // Gráfico de rendimiento: kWh generados
+        try{
+          const labels = data.map(m=>m.periodo);
+          const series = data.map(m=>Number(m.kwh_gen||0));
+          const ctx = document.getElementById('perfChart');
+          if (ctx && window.Chart){
+            new Chart(ctx,{type:'bar',data:{labels, datasets:[{label:'kWh generados', data:series, backgroundColor:'rgba(34,197,94,0.5)'}]}, options:{plugins:{legend:{display:false}}, scales:{x:{ticks:{autoSkip:true,maxRotation:0}}, y:{beginAtZero:true}}});
+          }
+        }catch{}
         // Resumen económico (estimado a 750 COP/kWh)
         const copPerKwh = 750;
         const totalKwh = data.reduce((a,m)=> a + Number(m.kwh_gen||0), 0);
@@ -107,11 +121,16 @@
           const panels = Math.round(kw / 0.55);
           const capexUsd = Math.round(kw * 600);
           const fmt = (n, cur='COP') => cur==='COP' ? new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n) : new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+          // VPN (NPV) simple con tasa 10% anual, flujo mensual = ingreso mensual
+          const r = Math.pow(1+0.10,1/12)-1; // tasa mensual equivalente
+          const ingresosMensuales = data.map(m => Number(m.kwh_gen||0) * copPerKwh);
+          let npv = 0; ingresosMensuales.forEach((f,i)=>{ npv += f/Math.pow(1+r, i+1); });
           document.getElementById('econ').innerHTML = `
             <div class="grid md:grid-cols-3 gap-4">
               <div><div class="text-sm text-[color:var(--text-secondary)]">Ingreso estimado (18m)</div><div class="text-xl font-semibold">${fmt(ingresoCop,'COP')}</div></div>
               <div><div class="text-sm text-[color:var(--text-secondary)]">Paneles aprox</div><div class="text-xl font-semibold">${panels}</div></div>
               <div><div class="text-sm text-[color:var(--text-secondary)]">CAPEX aproximado</div><div class="text-xl font-semibold">${fmt(capexUsd,'USD')}</div></div>
+              <div class="md:col-span-3"><div class="text-sm text-[color:var(--text-secondary)]">VPN (flujo generado a 10% anual)</div><div class="text-xl font-semibold">${fmt(npv,'COP')}</div></div>
             </div>`;
         }catch{ document.getElementById('econ').innerHTML = '—'; }
       }
