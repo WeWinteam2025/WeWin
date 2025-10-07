@@ -114,8 +114,23 @@
           <div id="list-ce">Cargando...</div>
         </div>
       </section>
+
+      <!-- Visualizaciones -->
+      <section class="grid md:grid-cols-3 gap-4">
+        <div class="card md:col-span-2">
+          <h3 class="text-lg font-semibold mb-3">Ingresos estimados</h3>
+          <canvas id="revChart" height="120"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-3">Proyectos en Colombia</h3>
+          <div id="map" style="height:320px;border-radius:12px;overflow:hidden"></div>
+        </div>
+      </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
       const API = window.API_BASE || 'http://localhost:8001';
 
@@ -188,6 +203,37 @@
           document.getElementById('list-demands').innerHTML = demandsHtml;
           const ceHtml = ce.slice(0,6).map(c=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${c.nombre||'Comunidad'}</span><span class="text-[color:var(--text-secondary)]">${c.miembros||0} miembros</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
           document.getElementById('list-ce').innerHTML = ceHtml;
+
+          // Render ingresos estimados (mock a partir de ofertas)
+          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+          const base = (aO || 0.22) * 10000; // proxy ingresos
+          const series = months.map((_,i)=> (base * (0.9 + Math.sin(i/2)*0.05 + i*0.01)).toFixed(0));
+          const ctx = document.getElementById('revChart');
+          if (ctx && window.Chart){
+            new Chart(ctx, { type:'line', data:{ labels: months, datasets:[{ label:'US$', data: series, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.15)', tension:0.35, fill:true }]}, options:{ plugins:{ legend:{ display:false }}, scales:{ y:{ ticks:{ callback:(v)=>'$'+v }}} }});
+          }
+
+          // Render mapa Colombia con proyectos (ubicación proxy por ciudad en nombre)
+          const mapEl = document.getElementById('map');
+          if (mapEl && window.L){
+            const map = L.map('map').setView([4.7,-74.1], 5.2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+            // Cargar proyectos públicos activos
+            try{
+              let pr = await fetch(`${API}/api/projects/?only_active=1&limit=50`);
+              let pj = await safeJson(pr); if (!Array.isArray(pj) && pj?.results) pj = pj.results; if (!Array.isArray(pj)) pj = [];
+              const geo = {
+                'bogota': [4.711, -74.072], 'medellin': [6.244, -75.581], 'cali':[3.452,-76.532], 'barranquilla':[10.963,-74.796],
+                'cartagena':[10.391,-75.479], 'bucaramanga':[7.119,-73.123], 'pereira':[4.813,-75.696], 'manizales':[5.07,-75.52]
+              };
+              pj.forEach(p => {
+                const name = String(p.ubicacion||'').toLowerCase();
+                const key = Object.keys(geo).find(k => name.includes(k));
+                const latlng = key ? geo[key] : [4.7,-74.1];
+                L.marker(latlng).addTo(map).bindPopup(`<strong>${p.ubicacion||'Proyecto'}</strong><br/>${p.potencia_kw} kW • ${p.estado}`);
+              });
+            }catch{}
+          }
         } catch(e){ console.warn(e); }
       }
       loadData();
