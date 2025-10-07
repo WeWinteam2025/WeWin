@@ -10,7 +10,26 @@
   </head>
   <body class="min-h-screen">
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <div hx-get="/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+      <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
+        <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+            <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+          </div>
+          <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+            <a href="/" class="hover:opacity-80">Inicio</a>
+            <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+            <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+            <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
+            <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
+            <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
+            <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
+            <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
+            <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
+            <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+            <span id="auth-slot"></span>
+          </nav>
+        </div>
+      </header>
       <h1 class="text-2xl font-semibold">Proyectos</h1>
       <div id="projects-grid" class="grid md:grid-cols-3 gap-4">
         Cargando tarjetas...
@@ -23,7 +42,11 @@
   </body>
 </html>
 <script>
-  const API = window.API_BASE || 'http://localhost:8001';
+  function getAPI(){
+    if (window.API_BASE) return window.API_BASE;
+    if (location.hostname.includes('wewin.space')) return 'https://api.wewin.space';
+    return 'http://localhost:8001';
+  }
   function renderInlineLogin(targetId, onSuccess){
     const el = document.getElementById(targetId);
     if (!el) return;
@@ -61,9 +84,8 @@
   async function loadProjects() {
     const target = document.getElementById('projects-grid');
     try {
-      const token = localStorage.getItem('access');
-      if (!token) { renderInlineLogin('projects-grid', loadProjects); return; }
-      const res = await fetch(`${API}/api/projects/`, { headers: { 'Authorization': `Bearer ${token}` }});
+      // No exigir token para leer proyectos
+      const res = await fetch(`${getAPI()}/api/projects/?only_active=1`);
       if (!res.ok) {
         if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver proyectos.'; return; }
         target.innerHTML = '<div class="text-red-600">Error cargando proyectos.</div>'; return;
@@ -90,10 +112,8 @@
   }
   async function loadMeasurements() {
     const target = document.getElementById('measurements-list');
-    const token = localStorage.getItem('access');
-    if (!token) { target.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
     try {
-      const res = await fetch(`${API}/api/measurements/`, { headers: { 'Authorization': `Bearer ${token}` }});
+      const res = await fetch(`${getAPI()}/api/measurements/`);
       if (!res.ok) {
         if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
         target.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>'; return;
