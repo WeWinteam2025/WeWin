@@ -27,7 +27,11 @@
       </section>
     </div>
     <script>
-      const API = window.API_BASE || 'http://localhost:8001';
+      function getAPI(){
+        if (window.API_BASE) return window.API_BASE;
+        if (location.hostname.includes('wewin.space')) return 'https://api.wewin.space';
+        return 'http://localhost:8001';
+      }
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
       function requireLogin(){ return localStorage.getItem('access'); }
@@ -69,9 +73,10 @@
         });
       }
       async function loadProject(){
-        const res = await fetch(`${API}/api/projects/${id}/`);
-        if(!res.ok){ document.getElementById('proj').innerHTML = 'No se pudo cargar el proyecto.'; return; }
-        const p = await res.json();
+        try{
+          const res = await fetch(`${getAPI()}/api/projects/${id}/`);
+          if(!res.ok){ document.getElementById('proj').innerHTML = 'No se pudo cargar el proyecto.'; return; }
+          const p = await res.json();
         document.getElementById('proj').innerHTML = `
           <div class="card">
             ${p.image_url ? `<img src="${p.image_url}" class="w-full h-56 object-cover rounded mb-4"/>` : ''}
@@ -79,13 +84,17 @@
             <h1 class="text-2xl font-semibold mb-1">${p.ubicacion}</h1>
             <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong> • Estado: ${p.estado}</div>
           </div>`;
+        }catch(e){ document.getElementById('proj').innerHTML = 'Error de red al cargar proyecto.'; }
       }
       async function loadMeasurements(){
         const token = requireLogin();
         if(!token){ renderInlineLogin('proj-measurements', loadMeasurements); return; }
-        const res = await fetch(`${API}/api/measurements/?proyecto=${id}`, { headers: { Authorization: `Bearer ${token}` }});
-        if(!res.ok){ document.getElementById('proj-measurements').innerHTML = 'No se pudo cargar.'; return; }
-        let data = await res.json();
+        let data = [];
+        try {
+          const res = await fetch(`${getAPI()}/api/measurements/?proyecto=${id}`, { headers: { Authorization: `Bearer ${token}` }});
+          if(!res.ok){ document.getElementById('proj-measurements').innerHTML = 'No se pudo cargar.'; return; }
+          data = await res.json();
+        } catch(e){ document.getElementById('proj-measurements').innerHTML = 'Error de red.'; return; }
         if (!Array.isArray(data) && data?.value) data = data.value;
         if (!Array.isArray(data)) data = [];
         if (data.length === 0){ document.getElementById('proj-measurements').innerHTML = 'Sin mediciones.'; return; }
@@ -115,7 +124,7 @@
         const ingresoCop = totalKwh * copPerKwh;
         // paneles y CAPEX aprox (mismo criterio que seed)
         try{
-          const prRes = await fetch(`${API}/api/projects/${id}/`);
+          const prRes = await fetch(`${getAPI()}/api/projects/${id}/`);
           const pr = await prRes.json();
           const kw = Number(pr.potencia_kw||0);
           const panels = Math.round(kw / 0.55);
