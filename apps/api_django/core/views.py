@@ -32,8 +32,24 @@ class ActorViewSet(viewsets.ModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    # Ahora todo acceso a proyectos requiere autenticación
-    permission_classes = [permissions.IsAuthenticated]
+    # Lectura pública, escritura autenticada
+    permission_classes = [ReadPublicPermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset().order_by('-id')
+        estado = self.request.query_params.get('estado')
+        only_active = self.request.query_params.get('active') or self.request.query_params.get('only_active')
+        if estado:
+            qs = qs.filter(estado__iexact=estado)
+        elif only_active:
+            qs = qs.filter(estado__in=['ACTIVO', 'ACTIVE', 'EN_CURSO', 'RUNNING'])
+        limit = self.request.query_params.get('limit')
+        if limit:
+            try:
+                qs = qs[: int(limit)]
+            except Exception:
+                pass
+        return qs
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
