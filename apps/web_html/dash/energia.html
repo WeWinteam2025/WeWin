@@ -9,13 +9,35 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
+    <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
+      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+          <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+        </div>
+        <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+          <a href="/" class="hover:opacity-80">Inicio</a>
+          <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+          <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+          <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
+          <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
+          <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
+          <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
+          <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
+          <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
+          <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+          <span id="auth-slot"></span>
+        </nav>
+      </div>
+      <script src="/navbar-init.js"></script>
+    </header>
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
-      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
       <h1 class="text-2xl font-semibold">Mercado de Energía</h1>
+
+      <div id="auth-gate" class=""></div>
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Publicar oferta (demo)</h2>
-        <form class="space-y-3" hx-post="" hx-target="#offer-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/offers');">
+        <form id="offer-form" class="space-y-3" hx-post="" hx-target="#offer-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/offers');">
           <input name="vendedor" placeholder="actor_id vendedor (opcional si hay login)" class="input" />
           <input name="precio_ref" type="number" min="0" step="0.0001" placeholder="precio_ref" class="input" required />
           <input name="capacidad_kw" type="number" min="0" step="0.01" placeholder="capacidad_kw" class="input" required />
@@ -26,7 +48,7 @@
 
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Publicar demanda (demo)</h2>
-        <form class="space-y-3" hx-post="" hx-target="#demand-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/demands');">
+        <form id="demand-form" class="space-y-3" hx-post="" hx-target="#demand-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/demands');">
           <input name="comprador" placeholder="actor_id comprador (opcional si hay login)" class="input" />
           <input name="precio_obj" type="number" min="0" step="0.0001" placeholder="precio_obj" class="input" required />
           <button class="btn-primary" hx-on::after-request="this.closest('form').reset(); htmx.trigger('#offers-public','load')">Crear demanda</button>
@@ -41,6 +63,43 @@
 
     </div>
     <script>
+      function renderInlineLogin(targetId, onSuccess){
+        const el = document.getElementById(targetId);
+        if (!el) return;
+        el.innerHTML = `
+          <div class="max-w-md">
+            <p class="mb-3">Inicia sesión para publicar oferta o demanda.</p>
+            <form id="inline-login" class="space-y-3">
+              <div>
+                <label class="block text-sm mb-1">Usuario o email</label>
+                <input id="inline-user" class="input" placeholder="demo" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Contraseña</label>
+                <input id="inline-pass" type="password" class="input" placeholder="••••••" />
+              </div>
+              <button class="btn-primary" type="submit">Entrar</button>
+            </form>
+          </div>`;
+        const form = document.getElementById('inline-login');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const API = window.API_BASE || 'http://localhost:8001';
+          const username = document.getElementById('inline-user').value;
+          const password = document.getElementById('inline-pass').value;
+          try {
+            const res = await fetch(`${API}/api/token/`, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ username, password }) });
+            const data = await res.json();
+            if (res.ok && data.access) {
+              localStorage.setItem('access', data.access);
+              if (data.refresh) localStorage.setItem('refresh', data.refresh);
+              if (typeof onSuccess === 'function') onSuccess();
+              document.getElementById('auth-gate').innerHTML='';
+              ['offer-form','demand-form'].forEach(id => { const f=document.getElementById(id); if (f){ f.style.pointerEvents='auto'; f.style.opacity='1'; }});
+            } else { alert('Credenciales inválidas'); }
+          } catch(err){ alert('Error de red'); }
+        });
+      }
       // Adjunta Bearer a TODAS las requests HTMX
       document.addEventListener('htmx:configRequest', (evt) => {
         const token = localStorage.getItem('access');
@@ -48,6 +107,14 @@
           evt.detail.headers['Authorization'] = 'Bearer ' + token;
         }
       });
+      // Gateo si no hay token
+      (function(){
+        const token = localStorage.getItem('access');
+        if (!token){
+          ['offer-form','demand-form'].forEach(id => { const f=document.getElementById(id); if (f){ f.style.pointerEvents='none'; f.style.opacity='0.5'; }});
+          renderInlineLogin('auth-gate');
+        }
+      })();
       // Feedback básico de error
       document.addEventListener('htmx:responseError', (e) => {
         const status = e.detail.xhr?.status;
