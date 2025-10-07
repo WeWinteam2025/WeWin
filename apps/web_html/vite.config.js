@@ -15,6 +15,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: path.resolve(__dirname, 'index.html'),
+        blog_index: path.resolve(__dirname, 'blog/index.html'),
+        blog_comunidad: path.resolve(__dirname, 'blog/comunidad-solar.html'),
+        blog_ppa: path.resolve(__dirname, 'blog/ppa-para-pymes.html'),
+        blog_instaladores: path.resolve(__dirname, 'blog/instaladores-calidad.html'),
+        blog_financiacion: path.resolve(__dirname, 'blog/financiacion-proyectos.html'),
         login: path.resolve(__dirname, 'auth/login.html'),
         register: path.resolve(__dirname, 'auth/register.html'),
         dash_index: path.resolve(__dirname, 'dash/index.html'),

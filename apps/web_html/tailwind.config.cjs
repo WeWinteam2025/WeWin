@@ -4,6 +4,7 @@ const tokens = require('../../packages/design/tailwind.tokens.cjs')
 module.exports = {
   content: [
     './index.html',
+    './blog/**/*.html',
     './dash/**/*.html',
     './auth/**/*.html',
     './partials/**/*.html',
