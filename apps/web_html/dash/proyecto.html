@@ -53,6 +53,7 @@
       }
       const params = new URLSearchParams(window.location.search);
       let id = params.get('id');
+      let slug = params.get('slug');
       function requireLogin(){ return localStorage.getItem('access'); }
 
       function renderInlineLogin(targetId, onSuccess){
@@ -93,14 +94,13 @@
       }
       async function ensureProjectId(){
         if (id && id !== 'ID') return id;
-        // intenta obtener el primer proyecto público
-        try{
-          const r = await fetch(`${getAPI()}/api/projects/?limit=1`);
-          let d = await r.json();
-          if (!Array.isArray(d) && d?.results) d = d.results;
-          if (Array.isArray(d) && d.length>0){ id = String(d[0].id); return id; }
-        }catch{}
-        return null;
+        if (slug){
+          try{
+            const r = await fetch(`${getAPI()}/api/core/projects/by_slug/?slug=${encodeURIComponent(slug)}`);
+            if (r.ok){ const p = await r.json(); id = String(p.id); return id; }
+          }catch{}
+        }
+        return null; // no fallback para evitar ambigüedad
       }
 
       async function loadProject(){

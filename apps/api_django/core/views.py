@@ -1,4 +1,6 @@
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import Organization, Actor, Project, Measurement, Contract, UserProfile
 from .serializers import (
     OrganizationSerializer,
@@ -50,6 +52,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
             except Exception:
                 pass
         return qs
+
+    @action(detail=False, methods=['get'])
+    def by_slug(self, request):
+        slug = request.query_params.get('slug')
+        if not slug:
+            return Response({'error': 'slug requerido'}, status=400)
+        try:
+            p = Project.objects.get(slug=slug)
+        except Project.DoesNotExist:
+            return Response({'error': 'no encontrado'}, status=404)
+        s = self.get_serializer(p)
+        return Response(s.data)
 
 
 class MeasurementViewSet(viewsets.ModelViewSet):
