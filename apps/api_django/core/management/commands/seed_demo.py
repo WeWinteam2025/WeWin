@@ -79,9 +79,22 @@ class Command(BaseCommand):
             if not p3.image_url:
                 p3.image_url = img3
                 p3.save()
-        # Measurements
-        Measurement.objects.get_or_create(proyecto=p1, periodo='2025-09', defaults={'kwh_gen': 12450, 'kwh_cons': 9800, 'kwh_exced': 2650})
-        Measurement.objects.get_or_create(proyecto=p2, periodo='2025-09', defaults={'kwh_gen': 73200, 'kwh_cons': 65000, 'kwh_exced': 8200})
+        # 18+ meses de mediciones para proyectos base
+        def add_measure_series(proj, start_year=2024, start_month=4, months=18, base_kw=100):
+            # Genera series mensuales con ligera variación, calcula excedentes
+            y, m = start_year, start_month
+            for i in range(months):
+                periodo = f"{y}-{m:02d}"
+                factor = 0.9 + ((i % 12)/120)  # leve tendencia
+                gen = int(base_kw * 120 * factor)  # kWh mensual aproximado
+                cons = int(gen * 0.78)
+                exced = gen - cons
+                Measurement.objects.get_or_create(proyecto=proj, periodo=periodo, defaults={'kwh_gen': gen, 'kwh_cons': cons, 'kwh_exced': exced})
+                m += 1
+                if m > 12: m = 1; y += 1
+
+        add_measure_series(p1, base_kw=100)
+        add_measure_series(p2, base_kw=500)
 
         # Wallets
         for a in actors.values():
@@ -180,6 +193,21 @@ class Command(BaseCommand):
         cA.partes.set([buyerA.id, vend2.id])
         cB, _ = Contract.objects.get_or_create(tipo='PPA', proyecto=pds, tarifa=0.2050, vigencia='2025-2031')
         cB.partes.set([buyerB.id, vend2.id])
+
+        # Mediciones para proyectos de David (18+ meses)
+        add_measure_series(pdn, base_kw=250)
+        add_measure_series(pds, base_kw=180)
+
+        # Inversión y número de paneles (aprox: 1 panel = 550W = 0.55 kW; costo 600 USD/kW)
+        def calc_panels_and_capex(kw):
+            panels = int(round(kw / 0.55))
+            capex = int(round(kw * 600))  # USD
+            return panels, capex
+        for proj in [p1, p2, p3, pdn, pds]:
+            panels, capex = calc_panels_and_capex(float(proj.potencia_kw))
+            # Guardar en terms de un contrato dummy o metadata vía Wallet/Investment? Usamos Investment como proxy
+            Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': capex, 'expected_irr': 12})
+
 
         # ===== Catálogo de 12 empresas compradoras (reales en el mercado colombiano) =====
         companies = [
