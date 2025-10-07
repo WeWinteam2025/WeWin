@@ -33,7 +33,7 @@
         return 'http://localhost:8001';
       }
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
+      let id = params.get('id');
       function requireLogin(){ return localStorage.getItem('access'); }
 
       function renderInlineLogin(targetId, onSuccess){
@@ -72,9 +72,23 @@
           } catch(err){ alert('Error de red'); }
         });
       }
-      async function loadProject(){
+      async function ensureProjectId(){
+        if (id && id !== 'ID') return id;
+        // intenta obtener el primer proyecto público
         try{
-          const res = await fetch(`${getAPI()}/api/projects/${id}/`);
+          const r = await fetch(`${getAPI()}/api/projects/?limit=1`);
+          let d = await r.json();
+          if (!Array.isArray(d) && d?.results) d = d.results;
+          if (Array.isArray(d) && d.length>0){ id = String(d[0].id); return id; }
+        }catch{}
+        return null;
+      }
+
+      async function loadProject(){
+        const pid = await ensureProjectId();
+        if (!pid){ document.getElementById('proj').innerHTML = 'No hay proyectos para mostrar.'; return; }
+        try{
+          const res = await fetch(`${getAPI()}/api/projects/${pid}/`);
           if(!res.ok){ document.getElementById('proj').innerHTML = 'No se pudo cargar el proyecto.'; return; }
           const p = await res.json();
         document.getElementById('proj').innerHTML = `
@@ -87,11 +101,13 @@
         }catch(e){ document.getElementById('proj').innerHTML = 'Error de red al cargar proyecto.'; }
       }
       async function loadMeasurements(){
+        const pid = await ensureProjectId();
+        if(!pid){ document.getElementById('proj-measurements').innerHTML = 'No hay proyecto.'; return; }
         const token = requireLogin();
         if(!token){ renderInlineLogin('proj-measurements', loadMeasurements); return; }
         let data = [];
         try {
-          const res = await fetch(`${getAPI()}/api/measurements/?proyecto=${id}`, { headers: { Authorization: `Bearer ${token}` }});
+          const res = await fetch(`${getAPI()}/api/measurements/?proyecto=${pid}`, { headers: { Authorization: `Bearer ${token}` }});
           if(!res.ok){ document.getElementById('proj-measurements').innerHTML = 'No se pudo cargar.'; return; }
           data = await res.json();
         } catch(e){ document.getElementById('proj-measurements').innerHTML = 'Error de red.'; return; }
@@ -124,7 +140,7 @@
         const ingresoCop = totalKwh * copPerKwh;
         // paneles y CAPEX aprox (mismo criterio que seed)
         try{
-          const prRes = await fetch(`${getAPI()}/api/projects/${id}/`);
+          const prRes = await fetch(`${getAPI()}/api/projects/${pid}/`);
           const pr = await prRes.json();
           const kw = Number(pr.potencia_kw||0);
           const panels = Math.round(kw / 0.55);
