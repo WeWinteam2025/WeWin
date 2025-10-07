@@ -6,45 +6,123 @@
     <title>We Win</title>
     <link rel="stylesheet" href="/src/style.css" />
     <script src="/config.js"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen bg-[color:var(--brand-bg)]">
-    <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
-      <div hx-get="/public/partials/navbar.html" hx-trigger="load" hx-swap="outerHTML"></div>
+    <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur sticky top-0 z-50">
+      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+          <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+        </div>
+        <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+          <a href="/" class="hover:opacity-80">Inicio</a>
+          <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+          <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+          <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
+          <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
+          <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
+          <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
+          <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
+          <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
+          <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+          <a href="/blog/index.html" class="hover:opacity-80">Blog</a>
+          <span id="auth-slot"></span>
+        </nav>
+      </div>
+      <script src="/navbar-init.js"></script>
     </header>
     <main>
-      <section class="mx-auto max-w-5xl px-6 py-20 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-6">Gana claridad, decide con datos</h1>
-        <p class="text-lg md:text-xl text-[color:var(--text-secondary)] mb-10">Tecnología, inclusión y sostenibilidad al servicio de la gente.</p>
+      <!-- Hero orientado a comunidad solar -->
+      <section class="mx-auto max-w-6xl px-6 py-16 md:py-24 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-6">Comunidad de Energía Solar</h1>
+        <p class="text-lg md:text-xl text-[color:var(--text-secondary)] mb-10">Conecta propietarios de techo, instaladores, compradores, inversionistas y comunidad en un solo lugar.</p>
         <div class="flex items-center justify-center gap-4">
           <a href="/dash/index.html" class="btn-primary">Ir al Dashboard</a>
-          <a href="/dash/proyectos.html" class="inline-flex items-center px-4 py-2 rounded border border-slate-300 bg-white hover:bg-slate-50 transition">Ver Proyectos</a>
-          <button id="btn-health" class="inline-flex items-center px-4 py-2 rounded border border-white/20 hover:bg-white/5 transition"
-                  hx-get="" hx-target="#health-result" hx-swap="innerHTML" onclick="this.setAttribute('hx-get', (window.API_BASE||'') + '/healthz')">
-            Probar API
-          </button>
+          <a href="#activos" class="inline-flex items-center px-4 py-2 rounded border border-slate-300 bg-white hover:bg-slate-50 transition">Ver Proyectos Activos</a>
+          <button id="btn-health" class="inline-flex items-center px-4 py-2 rounded border border-white/20 hover:bg-white/5 transition">Probar API</button>
         </div>
         <div id="health-result" class="mt-6 text-sm text-[color:var(--text-secondary)]"></div>
       </section>
 
-      <section class="mx-auto max-w-6xl px-6 grid md:grid-cols-3 gap-6 pb-20">
+      <!-- Stakeholders -->
+      <section class="mx-auto max-w-6xl px-6 pb-12 grid md:grid-cols-3 gap-6">
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">KPIs en minutos</h3>
-          <p class="text-[color:var(--text-secondary)]">Configura tarjetas y tablas rápidas con nuestros componentes.</p>
+          <h3 class="text-lg font-semibold mb-2">Propietarios de techo</h3>
+          <p class="text-[color:var(--text-secondary)]">Monetiza tu techo con energía solar y contratos PPA o leasing.</p>
         </div>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Diseño consistente</h3>
-          <p class="text-[color:var(--text-secondary)]">Tokens compartidos aplicados via Tailwind y CSS variables.</p>
+          <h3 class="text-lg font-semibold mb-2">Instaladores</h3>
+          <p class="text-[color:var(--text-secondary)]">Encuentra clientes y gestiona órdenes de trabajo con trazabilidad.</p>
         </div>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">API Django</h3>
-          <p class="text-[color:var(--text-secondary)]">Autenticación JWT, CORS y DB en Supabase listas para usar.</p>
+          <h3 class="text-lg font-semibold mb-2">Compradores / Comunidad</h3>
+          <p class="text-[color:var(--text-secondary)]">Compra energía limpia a precios competitivos y participa en comunidades solares.</p>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Inversionistas</h3>
+          <p class="text-[color:var(--text-secondary)]">Participa en proyectos con contratos de largo plazo y medición transparente.</p>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Gobierno / Aliados</h3>
+          <p class="text-[color:var(--text-secondary)]">Impulsa esquemas de generación distribuida y transición energética.</p>
+        </div>
+      </section>
+
+      <!-- Proyectos activos -->
+      <section id="activos" class="mx-auto max-w-6xl px-6 pb-12">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-semibold">Proyectos activos</h2>
+          <a href="/dash/proyectos.html" class="hover:opacity-80 text-sm">Ver todos</a>
+        </div>
+        <div id="projects-active" class="grid md:grid-cols-3 gap-4">Cargando proyectos…</div>
+      </section>
+
+      <!-- Noticias / Blog -->
+      <section class="mx-auto max-w-6xl px-6 pb-16">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-semibold">Noticias</h2>
+          <a href="/blog/index.html" class="hover:opacity-80 text-sm">Ver blog</a>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <a class="card block" href="/blog/comunidad-solar.html">
+            <div class="text-xl font-semibold mb-1">¿Qué es una comunidad de energía solar?</div>
+            <div class="text-[color:var(--text-secondary)]">Modelos, ventajas y participación de los stakeholders en América Latina.</div>
+          </a>
+          <a class="card block" href="/blog/ppa-para-pymes.html">
+            <div class="text-xl font-semibold mb-1">PPA para PYMES</div>
+            <div class="text-[color:var(--text-secondary)]">Cómo acceder a energía más barata y limpia con contratos a largo plazo.</div>
+          </a>
+          <a class="card block" href="/blog/instaladores-calidad.html">
+            <div class="text-xl font-semibold mb-1">Instaladores: calidad y trazabilidad</div>
+            <div class="text-[color:var(--text-secondary)]">Buenas prácticas de instalación y monitoreo de producción.</div>
+          </a>
+          <a class="card block" href="/blog/financiacion-proyectos.html">
+            <div class="text-xl font-semibold mb-1">Financiación de proyectos solares</div>
+            <div class="text-[color:var(--text-secondary)]">Estructuras típicas, riesgos y métricas clave para inversionistas.</div>
+          </a>
         </div>
       </section>
     </main>
     <footer class="border-t border-slate-200 bg-[color:var(--brand-surface)]">
       <div class="mx-auto max-w-7xl px-6 py-6 text-sm text-[color:var(--text-secondary)]">© 2025 WeWin</div>
     </footer>
+
+    <script>
+      (function(){
+        const API = window.API_BASE || 'http://localhost:8001';
+        const btn = document.getElementById('btn-health');
+        if (btn) {
+          btn.addEventListener('click', async () => {
+            try {
+              const r = await fetch(`${API}/healthz`);
+              const t = await r.text();
+              document.getElementById('health-result').innerText = r.ok ? t : `Error ${r.status}`;
+            } catch(e){
+              document.getElementById('health-result').innerText = 'Error de red';
+            }
+          });
+        }
+      })();
+    </script>
   </body>
   </html>
 
