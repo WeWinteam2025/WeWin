@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>We Win • Dashboard</title>
+    <title>We Win • Dashboard Comunidad</title>
     <link rel="stylesheet" href="/src/style.css" />
     <script src="/config.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
@@ -21,198 +21,177 @@
           <a href="/dash/energia.html" class="hover:opacity-80">Energía</a>
           <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
           <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
-          <a href="/dash/techos.html" class="hover:opacity-80">Techos</a>
-          <a href="/dash/instaladores.html" class="hover:opacity-80">Instaladores</a>
-          <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
           <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
           <span id="auth-slot"></span>
         </nav>
       </div>
-      <script src="/navbar-init.js"></script>
+      <script>
+        (function(){
+          function renderAuth(){
+            var slot = document.getElementById('auth-slot');
+            if (!slot) return;
+            var token = localStorage.getItem('access');
+            if (!token){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; return; }
+            var API = window.API_BASE || 'http://localhost:8001';
+            fetch(API + '/api/me', { headers: { Authorization: 'Bearer ' + token }})
+              .then(function(r){ return r.ok ? r.json() : null; })
+              .then(function(me){
+                var avatar = (me && me.avatar_url) ? me.avatar_url : 'https://www.gravatar.com/avatar/?d=identicon';
+                slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><img src="'+avatar+'" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"/></a>'+
+                  '<button id="logout-btn" style="margin-left:8px" class="btn-primary">Salir</button>';
+                var btn = document.getElementById('logout-btn');
+                if (btn) btn.addEventListener('click', function(){ localStorage.removeItem('access'); localStorage.removeItem('refresh'); window.location.href = '/auth/login.html'; });
+              }).catch(function(){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; });
+          }
+          document.addEventListener('DOMContentLoaded', renderAuth);
+        })();
+      </script>
     </header>
-    <div class="mx-auto max-w-6xl px-6 py-8 space-y-8">
-      <h1 class="text-2xl font-semibold">Dashboard</h1>
 
-      <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Catálogo (productos)</h2>
-        <form class="mb-4 space-y-2" hx-post="" hx-target="#products-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/products');">
-          <div class="grid md:grid-cols-4 gap-2">
-            <input name="sku" placeholder="SKU" required />
-            <input name="precio" type="number" min="0" step="0.01" placeholder="Precio" required />
-            <input name="stock" type="number" min="0" placeholder="Stock" required />
-            <button class="btn-primary" hx-on::after-request="this.closest('form').reset()">Crear producto</button>
+    <main class="mx-auto max-w-7xl px-6 py-10 space-y-10">
+      <!-- Hero -->
+      <section class="rounded-xl border border-slate-200 bg-[color:var(--brand-surface)] p-6 md:p-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-semibold">Panel de Comunidad Energética</h1>
+            <p class="text-[color:var(--text-secondary)] mt-2">Monitorea ofertas y demandas de energía, participa en comunidades y gestiona tus acciones desde un solo lugar.</p>
           </div>
-        </form>
-        <div id="products-flash" class="text-sm text-[color:var(--text-secondary)] mb-2"></div>
-        <div id="products-list" hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/products')">Cargando productos...</div>
+          <div class="flex gap-3">
+            <a href="#acciones" class="btn-primary">Acciones rápidas</a>
+            <a href="/blog/index.html" class="inline-flex items-center px-4 py-2 rounded border border-slate-300 bg-white hover:bg-slate-50">Aprender</a>
+          </div>
+        </div>
       </section>
 
-      <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Órdenes de trabajo</h2>
-        <form class="mb-4 space-y-2" hx-post="" hx-target="#workorders-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/workorders');">
-          <div class="grid md:grid-cols-4 gap-2">
-            <input name="instalador" placeholder="actor_id instalador" required />
-            <input name="proyecto" placeholder="proyecto_id" required />
-            <input name="estado" placeholder="estado" required />
-            <button class="btn-primary" hx-on::after-request="this.closest('form').reset()">Crear orden</button>
-          </div>
-        </form>
-        <div id="workorders-flash" class="text-sm text-[color:var(--text-secondary)] mb-2"></div>
-        <div id="workorders-list" hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/workorders')">Cargando órdenes...</div>
+      <!-- KPIs -->
+      <section class="grid md:grid-cols-4 gap-4" id="kpis">
+        <div class="card"><div class="badge-kpi">CE activas</div><div id="kpi-ce" class="mt-3 text-2xl font-semibold">—</div></div>
+        <div class="card"><div class="badge-kpi">Oferta promedio (US$/kWh)</div><div id="kpi-oferta" class="mt-3 text-2xl font-semibold">—</div></div>
+        <div class="card"><div class="badge-kpi">Demanda promedio (US$/kWh)</div><div id="kpi-demanda" class="mt-3 text-2xl font-semibold">—</div></div>
+        <div class="card"><div class="badge-kpi">CO₂ evitado (t)</div><div id="kpi-co2" class="mt-3 text-2xl font-semibold">—</div></div>
       </section>
 
-      <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Comunidad Energética</h2>
-        <div hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/ce')">Cargando CE...</div>
+      <!-- Acciones rápidas -->
+      <section id="acciones" class="grid md:grid-cols-3 gap-4">
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Publicar oferta</h3>
+          <div id="gate-offer" class="hidden"></div>
+          <form id="offer-form" class="space-y-2" hx-post="" hx-target="#offer-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/offers');">
+            <input name="precio_ref" type="number" step="0.0001" min="0" placeholder="Precio US$/kWh" class="input" required />
+            <input name="capacidad_kw" type="number" step="0.01" min="0" placeholder="Capacidad kW" class="input" required />
+            <button class="btn-primary">Crear oferta</button>
+            <div id="offer-flash" class="text-sm text-[color:var(--text-secondary)]"></div>
+          </form>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Publicar demanda</h3>
+          <div id="gate-demand" class="hidden"></div>
+          <form id="demand-form" class="space-y-2" hx-post="" hx-target="#demand-flash" hx-swap="innerHTML" onsubmit="this.setAttribute('hx-post', (window.API_BASE||'') + '/api/demands');">
+            <input name="precio_obj" type="number" step="0.0001" min="0" placeholder="Precio objetivo US$/kWh" class="input" required />
+            <button class="btn-primary">Crear demanda</button>
+            <div id="demand-flash" class="text-sm text-[color:var(--text-secondary)]"></div>
+          </form>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Unirse a comunidad</h3>
+          <p class="text-[color:var(--text-secondary)] mb-2">Explora comunidades activas y solicita ingreso.</p>
+          <a href="/dash/energia.html" class="btn-primary">Ver comunidades</a>
+        </div>
       </section>
 
-      <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Paquetes de consultoría</h2>
-        <div hx-get="" hx-trigger="load" hx-swap="innerHTML" onload="this.setAttribute('hx-get', (window.API_BASE||'') + '/api/consulting/packages')">Cargando paquetes...</div>
+      <!-- Listados de mercado -->
+      <section class="grid md:grid-cols-3 gap-4">
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-3">Ofertas públicas</h3>
+          <div id="list-offers">Cargando...</div>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-3">Demandas públicas</h3>
+          <div id="list-demands">Cargando...</div>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-3">Comunidades activas</h3>
+          <div id="list-ce">Cargando...</div>
+        </div>
       </section>
-    </div>
-  </body>
-  </html>
-<script>
-  // Autoriza todas las requests HTMX con el token
-  document.addEventListener('htmx:configRequest', (evt) => {
-    const token = localStorage.getItem('access');
-    if (token) evt.detail.headers['Authorization'] = 'Bearer ' + token;
-  });
-  document.addEventListener('htmx:responseError', (e) => {
-    const status = e.detail.xhr?.status;
-    if (status === 401) alert('No autenticado. Inicia sesión.');
-    else {
-      const tgt = e.detail.target || document.querySelector('#products-flash');
-      if (tgt) tgt.innerHTML = '<span class="text-red-600">' + (e.detail.xhr?.responseText || 'Error') + '</span>';
-    }
-  });
-  document.addEventListener('htmx:afterRequest', (e) => {
-    if (e.detail.successful) {
-      const id = (e.detail.elt.closest('form')?.getAttribute('hx-target')) || '#products-flash';
-      const tgt = document.querySelector(id);
-      if (tgt) tgt.innerHTML = '<span class="text-green-600">Guardado correctamente</span>';
-      // Refresh lists
-      if (id.includes('products')) htmx.trigger('#products-list', 'load');
-      if (id.includes('workorders')) htmx.trigger('#workorders-list', 'load');
-    }
-  });
-</script>
+    </main>
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>We Win • Dashboard</title>
-    <link rel="stylesheet" href="/src/style.css" />
-    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-  </head>
-  <body class="min-h-screen">
-    <div class="grid grid-cols-12 min-h-screen">
-      <aside class="col-span-12 md:col-span-3 lg:col-span-2 border-r border-white/10 p-4">
-        <div class="text-lg font-semibold mb-4">We Win</div>
-        <nav class="space-y-2 text-sm">
-          <a href="/dash/" class="block hover:opacity-80">Resumen</a>
-          <a href="#" class="block hover:opacity-80">Ventas</a>
-          <a href="#" class="block hover:opacity-80">Operaciones</a>
-          <a href="#" class="block hover:opacity-80">Configuración</a>
-        </nav>
-      </aside>
-      <main class="col-span-12 md:col-span-9 lg:col-span-10 p-6 space-y-6">
-        <header class="flex items-center justify-between">
-          <h1 class="text-2xl font-semibold">Resumen</h1>
-          <a href="/" class="text-sm hover:opacity-80">Volver</a>
-        </header>
-        <section class="grid md:grid-cols-4 gap-4">
-          <div class="card">
-            <div class="badge-kpi"><span class="w-2 h-2 rounded-full bg-[color:var(--success)]"></span> Ventas (hoy)</div>
-            <div class="mt-3 text-2xl font-semibold">$ 12.4k</div>
-            <div class="text-[color:var(--text-secondary)] text-sm mt-1">+8.2% vs ayer</div>
-          </div>
-          <div class="card">
-            <div class="badge-kpi"><span class="w-2 h-2 rounded-full bg-[color:var(--warning)]"></span> Órdenes pendientes</div>
-            <div class="mt-3 text-2xl font-semibold">31</div>
-            <div class="text-[color:var(--text-secondary)] text-sm mt-1">-3 desde ayer</div>
-          </div>
-          <div class="card">
-            <div class="badge-kpi"><span class="w-2 h-2 rounded-full bg-[color:var(--brand-primary)]"></span> NPS</div>
-            <div class="mt-3 text-2xl font-semibold">64</div>
-            <div class="text-[color:var(--text-secondary)] text-sm mt-1">Estable</div>
-          </div>
-          <div class="card">
-            <div class="badge-kpi"><span class="w-2 h-2 rounded-full bg-[color:var(--error)]"></span> Reclamos</div>
-            <div class="mt-3 text-2xl font-semibold">7</div>
-            <div class="text-[color:var(--text-secondary)] text-sm mt-1">+2 vs ayer</div>
-          </div>
-        </section>
+    <script>
+      const API = window.API_BASE || 'http://localhost:8001';
 
-        <section class="grid md:grid-cols-2 gap-4">
-          <div class="card">
-            <h3 class="text-lg font-semibold mb-4">Top productos</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead class="text-[color:var(--text-secondary)] text-left">
-                  <tr>
-                    <th class="py-2">Producto</th>
-                    <th class="py-2">Ventas</th>
-                    <th class="py-2">Ingreso</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">Tabla pino 2x4</td>
-                    <td class="py-2">142</td>
-                    <td class="py-2">$ 3,250</td>
-                  </tr>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">Aglomerado 18mm</td>
-                    <td class="py-2">85</td>
-                    <td class="py-2">$ 5,120</td>
-                  </tr>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">MDF 12mm</td>
-                    <td class="py-2">97</td>
-                    <td class="py-2">$ 2,980</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <h3 class="text-lg font-semibold mb-4">Últimas órdenes</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead class="text-[color:var(--text-secondary)] text-left">
-                  <tr>
-                    <th class="py-2">#</th>
-                    <th class="py-2">Cliente</th>
-                    <th class="py-2">Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">ORD-10243</td>
-                    <td class="py-2">Acme S.A.</td>
-                    <td class="py-2">En ruta</td>
-                  </tr>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">ORD-10244</td>
-                    <td class="py-2">MetalCo</td>
-                    <td class="py-2">Pendiente</td>
-                  </tr>
-                  <tr class="border-t border-white/10">
-                    <td class="py-2">ORD-10245</td>
-                    <td class="py-2">WoodWorks</td>
-                    <td class="py-2">Entregada</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+      // HTMX auth header
+      document.addEventListener('htmx:configRequest', (evt) => {
+        const token = localStorage.getItem('access');
+        if (token) evt.detail.headers['Authorization'] = 'Bearer ' + token;
+      });
+
+      // Inline login renderer
+      function renderInlineLogin(targetId){
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <div class="rounded border border-slate-200 p-3 bg-white/60">
+            <p class="mb-2">Inicia sesión para usar esta acción.</p>
+            <form id="inline-login" class="grid grid-cols-1 gap-2 md:grid-cols-3 items-end">
+              <input id="inline-user" class="input" placeholder="usuario o email" />
+              <input id="inline-pass" type="password" class="input" placeholder="contraseña" />
+              <button class="btn-primary" type="submit">Entrar</button>
+            </form>
+          </div>`;
+        const form = document.getElementById('inline-login');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          try {
+            const r = await fetch(`${API}/api/token/`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: inline-user.value, password: inline-pass.value })});
+            const d = await r.json();
+            if (r.ok && d.access){ localStorage.setItem('access', d.access); if (d.refresh) localStorage.setItem('refresh', d.refresh); container.remove(); enableForms(); }
+            else alert('Credenciales inválidas');
+          } catch { alert('Error de red'); }
+        });
+      }
+
+      function disableForms(){ ['offer-form','demand-form'].forEach(id=>{ const f=document.getElementById(id); if (f){ f.style.pointerEvents='none'; f.style.opacity='0.6'; }}); }
+      function enableForms(){ ['offer-form','demand-form'].forEach(id=>{ const f=document.getElementById(id); if (f){ f.style.pointerEvents='auto'; f.style.opacity='1'; }}); }
+
+      (function gate(){ const token = localStorage.getItem('access'); if (!token){ disableForms(); renderInlineLogin('gate-offer'); renderInlineLogin('gate-demand'); } })();
+
+      async function safeJson(r){ try { return await r.json(); } catch { return []; } }
+      function avg(arr, field){ const xs = arr.map(x=> Number(x[field]||0)).filter(n=>!isNaN(n) && isFinite(n)); if (!xs.length) return 0; return xs.reduce((a,b)=>a+b,0)/xs.length; }
+
+      async function loadData(){
+        try {
+          const [offR, demR, ceR] = await Promise.all([
+            fetch(`${API}/api/offers/public`),
+            fetch(`${API}/api/demands/public`),
+            fetch(`${API}/api/ce`)
+          ]);
+          let offers = await safeJson(offR); if (!Array.isArray(offers) && offers?.results) offers = offers.results; if (!Array.isArray(offers)) offers = [];
+          let demands = await safeJson(demR); if (!Array.isArray(demands) && demands?.results) demands = demands.results; if (!Array.isArray(demands)) demands = [];
+          let ce = await safeJson(ceR); if (!Array.isArray(ce) && ce?.results) ce = ce.results; if (!Array.isArray(ce)) ce = [];
+
+          document.getElementById('kpi-ce').textContent = String(ce.length);
+          const aO = avg(offers,'precio_ref');
+          const aD = avg(demands,'precio_obj');
+          document.getElementById('kpi-oferta').textContent = aO ? aO.toFixed(4) : '—';
+          document.getElementById('kpi-demanda').textContent = aD ? aD.toFixed(4) : '—';
+          const cap = offers.map(o=> Number(o.capacidad_kw||0)).filter(n=>!isNaN(n));
+          const kwh = cap.reduce((a,b)=>a+b,0) * 4; // proxy diario
+          const co2 = kwh * 0.45 / 1000; // tCO2 aprox por MWh
+          document.getElementById('kpi-co2').textContent = co2 ? co2.toFixed(2) : '—';
+
+          // render lists
+          const fmt = (n)=> new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(n);
+          const offersHtml = offers.slice(0,6).map(o=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${fmt(o.precio_ref||0)} US$/kWh</span><span class="text-[color:var(--text-secondary)]">${fmt(o.capacidad_kw||0)} kW</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin ofertas.</div>';
+          document.getElementById('list-offers').innerHTML = offersHtml;
+          const demandsHtml = demands.slice(0,6).map(d=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${fmt(d.precio_obj||0)} US$/kWh</span><span class="text-[color:var(--text-secondary)]">${d.estado||''}</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin demandas.</div>';
+          document.getElementById('list-demands').innerHTML = demandsHtml;
+          const ceHtml = ce.slice(0,6).map(c=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${c.nombre||'Comunidad'}</span><span class="text-[color:var(--text-secondary)]">${c.miembros||0} miembros</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
+          document.getElementById('list-ce').innerHTML = ceHtml;
+        } catch(e){ console.warn(e); }
+      }
+      loadData();
+    </script>
   </body>
   </html>
 
