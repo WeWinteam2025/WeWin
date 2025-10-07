@@ -46,7 +46,7 @@ class Command(BaseCommand):
         # Ensure three canonical projects exist with images; avoid duplicates
         p1 = Project.objects.filter(ubicacion='Zona Industrial').order_by('id').first()
         if not p1:
-            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=img1)
+            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=img1, slug='zona-industrial')
         else:
             updated = False
             if not p1.image_url:
@@ -60,7 +60,7 @@ class Command(BaseCommand):
 
         p2 = Project.objects.filter(ubicacion='Comunidad Energetica').order_by('id').first()
         if not p2:
-            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=img2)
+            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=img2, slug='comunidad-energetica')
         else:
             updated = False
             if not p2.image_url:
@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         p3 = Project.objects.filter(ubicacion='Residencial 12').order_by('id').first()
         if not p3:
-            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=img3)
+            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=img3, slug='residencial-12')
         else:
             if not p3.image_url:
                 p3.image_url = img3
@@ -171,8 +171,8 @@ class Command(BaseCommand):
 
         imgN = 'https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?q=80&w=1200&auto=format'
         imgS = 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1200&auto=format'
-        pdn, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': imgN})
-        pds, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': imgS})
+        pdn, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': imgN, 'slug': 'bogota-norte'})
+        pds, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': imgS, 'slug': 'medellin-sur'})
 
         # Dos compradores empresaA/empresaB
         empA, _ = User.objects.get_or_create(username='empresaA')
