@@ -146,6 +146,41 @@ class Command(BaseCommand):
         pack.servicios.add(svc)
         ConsultingContract.objects.get_or_create(contrato_base=c, paquete=pack)
 
+        # ===== Custom user: davidgmarin@outlook.com como generador con 2 proyectos =====
+        user_email = 'davidgmarin@outlook.com'
+        u2, _ = User.objects.get_or_create(username=user_email.split('@')[0], defaults={'email': user_email, 'is_active': True})
+        if not u2.has_usable_password():
+            u2.set_password('demo')
+            u2.save()
+        org2, _ = Organization.objects.get_or_create(name='Generador David')
+        vend2, _ = Actor.objects.get_or_create(user=u2, type='VENDOR', defaults={'organization': org2})
+        roof2, _ = Actor.objects.get_or_create(user=u2, type='ROOF_OWNER', defaults={'organization': org2})
+
+        imgN = 'https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?q=80&w=1200&auto=format'
+        imgS = 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1200&auto=format'
+        pdn, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': imgN})
+        pds, _ = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': imgS})
+
+        # Dos compradores empresaA/empresaB
+        empA, _ = User.objects.get_or_create(username='empresaA')
+        if not empA.has_usable_password():
+            empA.set_password('demo'); empA.save()
+        empB, _ = User.objects.get_or_create(username='empresaB')
+        if not empB.has_usable_password():
+            empB.set_password('demo'); empB.save()
+        buyerA, _ = Actor.objects.get_or_create(user=empA, type='BUYER')
+        buyerB, _ = Actor.objects.get_or_create(user=empB, type='BUYER')
+
+        # Ofertas de los dos proyectos
+        EnergyOffer.objects.get_or_create(vendedor=vend2, proyecto=pdn, defaults={'precio_ref': 0.22, 'capacidad_kw': 90})
+        EnergyOffer.objects.get_or_create(vendedor=vend2, proyecto=pds, defaults={'precio_ref': 0.21, 'capacidad_kw': 75})
+
+        # Contratos PPA simulando venta a dos empresas
+        cA, _ = Contract.objects.get_or_create(tipo='PPA', proyecto=pdn, tarifa=0.2150, vigencia='2025-2032')
+        cA.partes.set([buyerA.id, vend2.id])
+        cB, _ = Contract.objects.get_or_create(tipo='PPA', proyecto=pds, tarifa=0.2050, vigencia='2025-2031')
+        cB.partes.set([buyerB.id, vend2.id])
+
         self.stdout.write(self.style.SUCCESS('Seeded demo data'))
 
 
