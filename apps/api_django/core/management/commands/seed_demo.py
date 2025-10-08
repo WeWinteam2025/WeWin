@@ -177,6 +177,23 @@ class Command(BaseCommand):
             seller_users.append(seller_actor)
 
         vendors = seller_users or [actors['VENDOR'], actors['IMPORTER'], actors['INSTALLER']]
+        # Imagenes estables por tipo (evita 503 de Unsplash Source)
+        stable_imgs = {
+            'panel': 'https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?q=80&w=800&auto=format',
+            'inversor': 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format',
+            'microinversor': 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?q=80&w=800&auto=format',
+            'batería': 'https://images.unsplash.com/photo-1581092332341-22f8c5f6f9b4?q=80&w=800&auto=format',
+            'controlador': 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=800&auto=format',
+            'estructura': 'https://images.unsplash.com/photo-1503104834685-7205e8607eb9?q=80&w=800&auto=format',
+            'cable': 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format',
+            'conector': 'https://images.unsplash.com/photo-1527430253228-e93688616381?q=80&w=800&auto=format',
+            'protección': 'https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format',
+            'medidor': 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format',
+            'estacion': 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=800&auto=format',
+            'kit': 'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=800&auto=format',
+            'monitoreo': 'https://images.unsplash.com/photo-1527443224154-c4f2a4a2d140?q=80&w=800&auto=format',
+        }
+
         for i, (sku, price, stock, specs) in enumerate(catalog_items):
             p, created = Product.objects.get_or_create(
                 sku=sku,
@@ -186,13 +203,13 @@ class Command(BaseCommand):
                     'precio': price,
                     'stock': stock,
                     'specs': specs,
-                    'image_url': f'https://source.unsplash.com/400x240/?{specs.get("tipo","solar")},solar',
+                    'image_url': stable_imgs.get(specs.get('tipo',''), 'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=800&auto=format'),
                 },
             )
             if not created:
                 changed = False
-                if not getattr(p, 'image_url', ''):
-                    p.image_url = f'https://source.unsplash.com/400x240/?{specs.get("tipo","solar")},solar'
+                if (not getattr(p, 'image_url', '')) or ('source.unsplash.com' in p.image_url):
+                    p.image_url = stable_imgs.get(specs.get('tipo',''), 'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=800&auto=format')
                     changed = True
                 if not p.vendedor:
                     p.vendedor = vendors[i % len(vendors)]
