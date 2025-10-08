@@ -128,27 +128,44 @@ class Command(BaseCommand):
         c, _ = Contract.objects.get_or_create(tipo='PPA', tarifa=0.21, vigencia='2025-2030')
         c.partes.set([actors['BUYER'].id, actors['VENDOR'].id])
 
-        # Catalog products
-        Product.objects.get_or_create(
-            sku='INV-5KW',
-            defaults={
-                'importador': actors['IMPORTER'],
-                'vendedor': actors['VENDOR'],
-                'precio': 2200,
-                'stock': 12,
-                'specs': {'potencia': '5kW', 'marca': 'SunBest'},
-            },
-        )
-        Product.objects.get_or_create(
-            sku='PANEL-550W',
-            defaults={
-                'importador': actors['IMPORTER'],
-                'vendedor': actors['VENDOR'],
-                'precio': 180,
-                'stock': 250,
-                'specs': {'potencia': '550W', 'cell': 'Mono PERC'},
-            },
-        )
+        # ===== Catálogo ampliado (20+ productos de infraestructura solar) =====
+        catalog_items = [
+            # sku, precio USD, stock, specs
+            ('PANEL-550W', 180, 500, {'tipo': 'panel', 'potencia': '550W', 'marca': 'JA Solar', 'cell': 'Mono PERC', 'garantia': '12/25 años'}),
+            ('PANEL-450W', 145, 600, {'tipo': 'panel', 'potencia': '450W', 'marca': 'Canadian Solar', 'cell': 'Mono PERC'}),
+            ('INV-3KW', 420, 60, {'tipo': 'inversor', 'potencia': '3kW', 'marca': 'Growatt', 'fase': 'Monofásico'}),
+            ('INV-5KW', 620, 55, {'tipo': 'inversor', 'potencia': '5kW', 'marca': 'SMA', 'fase': 'Monofásico'}),
+            ('INV-10KW', 980, 40, {'tipo': 'inversor', 'potencia': '10kW', 'marca': 'Huawei', 'fase': 'Trifásico'}),
+            ('MICRO-600W', 115, 120, {'tipo': 'microinversor', 'potencia': '600W', 'marca': 'Hoymiles'}),
+            ('BATT-5KWH-LFP', 1650, 30, {'tipo': 'batería', 'capacidad': '5kWh', 'quimica': 'LFP', 'marca': 'Pylontech'}),
+            ('BATT-10KWH-LFP', 3150, 25, {'tipo': 'batería', 'capacidad': '10kWh', 'quimica': 'LFP', 'marca': 'BYD'}),
+            ('MPPT-150V-70A', 390, 40, {'tipo': 'controlador', 'entrada': '150V', 'corriente': '70A', 'marca': 'Victron'}),
+            ('ESTRUCT-TECHO-L', 45, 400, {'tipo': 'estructura', 'aplicacion': 'techo lámina', 'incluye': 'rieles+abrazaderas'}),
+            ('ESTRUCT-TECHO-TEJA', 58, 300, {'tipo': 'estructura', 'aplicacion': 'teja arcilla', 'incluye': 'ganchos+rieles'}),
+            ('CABLE-SOLAR-6MM', 0.95, 8000, {'tipo': 'cable', 'calibre': '6mm2', 'cert': 'TÜV'}),
+            ('CABLE-SOLAR-4MM', 0.75, 12000, {'tipo': 'cable', 'calibre': '4mm2'}),
+            ('MC4-PAR', 2.3, 4000, {'tipo': 'conector', 'modelo': 'MC4', 'par': True}),
+            ('PROT-DC-1000V', 85, 70, {'tipo': 'protección', 'lado': 'DC', 'tension': '1000V'}),
+            ('PROT-AC-400V', 79, 80, {'tipo': 'protección', 'lado': 'AC', 'tension': '400V'}),
+            ('MEDIDOR-BIDIR', 260, 50, {'tipo': 'medidor', 'funcion': 'bidireccional', 'com': 'RS485'}),
+            ('ESTAC-ON-GRID', 3500, 8, {'tipo': 'estacion', 'capacidad': '10kWp', 'incluye': ['inversor', 'paneles', 'estructura']}),
+            ('KIT-RESID-3KW', 1850, 15, {'tipo': 'kit', 'potencia': '3kWp', 'uso': 'residencial'}),
+            ('KIT-COM-20KW', 12500, 6, {'tipo': 'kit', 'potencia': '20kWp', 'uso': 'comercial'}),
+            ('MONITOR-IOT', 140, 90, {'tipo': 'monitoreo', 'conectividad': 'WiFi/LTE'}),
+        ]
+
+        vendors = [actors['VENDOR'], actors['IMPORTER'], actors['INSTALLER']]
+        for i, (sku, price, stock, specs) in enumerate(catalog_items):
+            Product.objects.get_or_create(
+                sku=sku,
+                defaults={
+                    'importador': actors['IMPORTER'],
+                    'vendedor': vendors[i % len(vendors)],
+                    'precio': price,
+                    'stock': stock,
+                    'specs': specs,
+                },
+            )
 
         # EPC work order
         WorkOrder.objects.get_or_create(
