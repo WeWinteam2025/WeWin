@@ -41,10 +41,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset().order_by('-id')
         estado = self.request.query_params.get('estado')
         only_active = self.request.query_params.get('active') or self.request.query_params.get('only_active')
+        slug = self.request.query_params.get('slug')
+        owner_user = self.request.query_params.get('owner_user')
         if estado:
             qs = qs.filter(estado__iexact=estado)
         elif only_active:
             qs = qs.filter(estado__in=['ACTIVO', 'ACTIVE', 'EN_CURSO', 'RUNNING'])
+        if slug:
+            qs = qs.filter(slug=slug)
+        if owner_user:
+            qs = qs.filter(owner__user__username=owner_user)
         limit = self.request.query_params.get('limit')
         if limit:
             try:

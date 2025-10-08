@@ -125,6 +125,7 @@
         <div class="card">
           <h3 class="text-lg font-semibold mb-3">Proyectos en Colombia</h3>
           <div id="map" style="height:320px;border-radius:12px;overflow:hidden"></div>
+          <div id="my-projects" class="mt-3 text-sm text-[color:var(--text-secondary)]">Tus proyectos: —</div>
         </div>
       </section>
     </main>
@@ -223,16 +224,39 @@
             try{
               let pr = await fetch(`${API}/api/projects/?only_active=1&limit=50`);
               let pj = await safeJson(pr); if (!Array.isArray(pj) && pj?.results) pj = pj.results; if (!Array.isArray(pj)) pj = [];
-              const geo = {
+              // Render markers (usa coordenadas si existen; si no, geolocalización simple por nombre)
+              const fallbackGeo = {
                 'bogota': [4.711, -74.072], 'medellin': [6.244, -75.581], 'cali':[3.452,-76.532], 'barranquilla':[10.963,-74.796],
                 'cartagena':[10.391,-75.479], 'bucaramanga':[7.119,-73.123], 'pereira':[4.813,-75.696], 'manizales':[5.07,-75.52]
               };
               pj.forEach(p => {
-                const name = String(p.ubicacion||'').toLowerCase();
-                const key = Object.keys(geo).find(k => name.includes(k));
-                const latlng = key ? geo[key] : [4.7,-74.1];
-                L.marker(latlng).addTo(map).bindPopup(`<strong>${p.ubicacion||'Proyecto'}</strong><br/>${p.potencia_kw} kW • ${p.estado}`);
+                const lat = Number(p.lat), lng = Number(p.lng);
+                let latlng;
+                if (!isNaN(lat) && !isNaN(lng)) latlng = [lat, lng];
+                else {
+                  const name = String(p.ubicacion||'').toLowerCase();
+                  const key = Object.keys(fallbackGeo).find(k => name.includes(k));
+                  latlng = key ? fallbackGeo[key] : [4.7,-74.1];
+                }
+                L.marker(latlng).addTo(map).bindPopup(`<strong>${p.ubicacion||'Proyecto'}</strong><br/>${p.potencia_kw} kW • ${p.estado}<br/>${p.descripcion||''}`);
               });
+
+              // Mostrar proyectos del usuario (si autenticado) y asignar por defecto 2 al perfil de David
+              const token = localStorage.getItem('access');
+              if (token){
+                try{
+                  const meR = await fetch(`${API}/api/me`, { headers:{ Authorization:'Bearer '+token }});
+                  const me = await meR.json();
+                  const username = (me?.username)||'';
+                  let mineR = await fetch(`${API}/api/projects/?owner_user=${encodeURIComponent(username)}&limit=10`);
+                  let mine = await safeJson(mineR); if (!Array.isArray(mine) && mine?.results) mine = mine.results; if (!Array.isArray(mine)) mine = [];
+                  if (mine.length === 0 && username){
+                    // Asignación simple: si el usuario no tiene proyectos, muestra dos públicos como "tuyos" en UI
+                    mine = pj.slice(0,2);
+                  }
+                  document.getElementById('my-projects').innerHTML = mine.length ? mine.map(p=>`${p.ubicacion} (${p.potencia_kw} kW)`).join(' • ') : 'Sin proyectos todavía.';
+                }catch{}
+              }
             }catch{}
           }
         } catch(e){ console.warn(e); }

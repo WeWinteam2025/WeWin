@@ -55,6 +55,9 @@ class Project(models.Model):
     estado = models.CharField(max_length=64, default='INIT')
     image_url = models.URLField(blank=True, default='')
     slug = models.SlugField(unique=True, blank=True, null=True)
+    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    descripcion = models.CharField(max_length=512, blank=True, default='')
 
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.tipo} {self.potencia_kw}kW"

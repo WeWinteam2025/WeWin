@@ -202,13 +202,13 @@ class Command(BaseCommand):
         vend2, _ = Actor.objects.get_or_create(user=u2, type='VENDOR', defaults={'organization': org2})
         roof2, _ = Actor.objects.get_or_create(user=u2, type='ROOF_OWNER', defaults={'organization': org2})
 
-        pdn, created_n = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': image_for('IND', 250), 'slug': 'bogota-norte'})
+        pdn, created_n = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': image_for('IND', 250), 'slug': 'bogota-norte', 'lat': 4.75, 'lng': -74.05, 'descripcion': 'Techo industrial con 250 kW para autoconsumo y venta de excedentes.'})
         if not created_n:
             desired = image_for('IND', pdn.potencia_kw)
             if (not pdn.image_url) or ('source.unsplash.com' not in pdn.image_url):
                 pdn.image_url = desired
                 pdn.save()
-        pds, created_s = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': image_for('IND', 180), 'slug': 'medellin-sur'})
+        pds, created_s = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': image_for('IND', 180), 'slug': 'medellin-sur', 'lat': 6.20, 'lng': -75.58, 'descripcion': 'Cubierta comercial de 180 kW orientada a reducción de factura.'})
         if not created_s:
             desired = image_for('IND', pds.potencia_kw)
             if (not pds.image_url) or ('source.unsplash.com' not in pds.image_url):
