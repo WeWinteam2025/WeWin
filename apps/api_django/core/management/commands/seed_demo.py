@@ -39,10 +39,11 @@ class Command(BaseCommand):
                 usr.save()
 
         # Projects
-        # Imágenes solares por tamaño/tipo
-        residential_img = 'https://images.unsplash.com/photo-1565739388408-7070dbd06a57?q=80&w=1200&auto=format'
-        commercial_img = 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=1200&auto=format'
-        utility_img = 'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=1200&auto=format'
+        # Imágenes: priorizamos techos (viviendas/empresas) con paneles solares
+        # Usamos Unsplash Source para asegurar temática correcta
+        residential_img = 'https://source.unsplash.com/1200x675/?house,rooftop,solar,panels'
+        commercial_img = 'https://source.unsplash.com/1200x675/?building,roof,solar,panels'
+        utility_img = 'https://source.unsplash.com/1200x675/?industrial,rooftop,solar,panels'
 
         def image_for(tipo:str, kw:float) -> str:
             try:
@@ -62,7 +63,7 @@ class Command(BaseCommand):
         else:
             updated = False
             desired = image_for('IND', p1.potencia_kw)
-            if not p1.image_url or 'photo-1509395' in p1.image_url or 'fd1ca04f0952' in p1.image_url:
+            if (not p1.image_url) or ('source.unsplash.com' not in p1.image_url):
                 p1.image_url = desired
                 updated = True
             if p1.estado != 'ACTIVE':
@@ -77,7 +78,7 @@ class Command(BaseCommand):
         else:
             updated = False
             desired = image_for('CE', p2.potencia_kw)
-            if not p2.image_url or 'photo-1509395' in p2.image_url or 'fd1ca04f0952' in p2.image_url:
+            if (not p2.image_url) or ('source.unsplash.com' not in p2.image_url):
                 p2.image_url = desired
                 updated = True
             if p2.estado != 'ACTIVE':
@@ -91,7 +92,7 @@ class Command(BaseCommand):
             p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12')
         else:
             desired = image_for('RESID', p3.potencia_kw)
-            if not p3.image_url or 'photo-1509395' in p3.image_url or 'fd1ca04f0952' in p3.image_url:
+            if (not p3.image_url) or ('source.unsplash.com' not in p3.image_url):
                 p3.image_url = desired
                 p3.save()
         # 18+ meses de mediciones para proyectos base
@@ -204,13 +205,13 @@ class Command(BaseCommand):
         pdn, created_n = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': image_for('IND', 250), 'slug': 'bogota-norte'})
         if not created_n:
             desired = image_for('IND', pdn.potencia_kw)
-            if not pdn.image_url or 'photo-1509395' in pdn.image_url or 'fd1ca04f0952' in pdn.image_url:
+            if (not pdn.image_url) or ('source.unsplash.com' not in pdn.image_url):
                 pdn.image_url = desired
                 pdn.save()
         pds, created_s = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': image_for('IND', 180), 'slug': 'medellin-sur'})
         if not created_s:
             desired = image_for('IND', pds.potencia_kw)
-            if not pds.image_url or 'photo-1509395' in pds.image_url or 'fd1ca04f0952' in pds.image_url:
+            if (not pds.image_url) or ('source.unsplash.com' not in pds.image_url):
                 pds.image_url = desired
                 pds.save()
 
