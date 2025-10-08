@@ -161,12 +161,14 @@ class Command(BaseCommand):
         for name in seller_names:
             usr, _ = User.objects.get_or_create(username=name, defaults={'email': f'{name}@example.com'})
             if not usr.has_usable_password(): usr.set_password('demo'); usr.save()
-            seller_actor, _ = Actor.objects.get_or_create(user=usr, type='VENDOR', defaults={'organization': org})
+            # Cada vendedor con su propia organización
+            org_s, _ = Organization.objects.get_or_create(name=f"{name.upper()} Ltda")
+            seller_actor, _ = Actor.objects.get_or_create(user=usr, type='VENDOR', defaults={'organization': org_s})
             seller_users.append(seller_actor)
 
         vendors = seller_users or [actors['VENDOR'], actors['IMPORTER'], actors['INSTALLER']]
         for i, (sku, price, stock, specs) in enumerate(catalog_items):
-            Product.objects.get_or_create(
+            p, created = Product.objects.get_or_create(
                 sku=sku,
                 defaults={
                     'importador': actors['IMPORTER'],
@@ -177,6 +179,16 @@ class Command(BaseCommand):
                     'image_url': f'https://source.unsplash.com/400x240/?{specs.get("tipo","solar")},solar',
                 },
             )
+            if not created:
+                changed = False
+                if not getattr(p, 'image_url', ''):
+                    p.image_url = f'https://source.unsplash.com/400x240/?{specs.get("tipo","solar")},solar'
+                    changed = True
+                if not p.vendedor:
+                    p.vendedor = vendors[i % len(vendors)]
+                    changed = True
+                if changed:
+                    p.save()
 
         # EPC work order
         WorkOrder.objects.get_or_create(

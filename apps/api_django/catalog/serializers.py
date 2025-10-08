@@ -17,10 +17,24 @@ class ActorMiniSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     vendedor = ActorMiniSerializer(read_only=True)
     importador = ActorMiniSerializer(read_only=True)
+    vendor_username = serializers.SerializerMethodField()
+    vendor_org = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_vendor_username(self, obj):
+        try:
+            return getattr(obj.vendedor.user, 'username', '')
+        except Exception:
+            return ''
+
+    def get_vendor_org(self, obj):
+        try:
+            return getattr(obj.vendedor.organization, 'name', '')
+        except Exception:
+            return ''
 
 
 class B2BOrderSerializer(serializers.ModelSerializer):

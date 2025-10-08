@@ -83,14 +83,14 @@
         if (!Array.isArray(data)) data = [];
         const fmtUSD = (n)=> new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
         grid.innerHTML = data.map(p => {
-          const vendor = (p.vendedor && p.vendedor.organization_name) ? p.vendedor.organization_name : (p.vendedor_name||'Proveedor');
+          const vendor = p.vendor_org || (p.vendedor && p.vendedor.organization_name) || 'Proveedor';
           const tags = Object.entries(p.specs||{}).slice(0,4).map(([k,v])=>`<span class="badge">${k}: ${v}</span>`).join(' ');
           return `
           <div class="card">
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-xl font-semibold mb-1">${p.sku}</div>
-                <div class="text-sm text-[color:var(--text-secondary)]">${vendor}</div>
+                <div class="text-sm text-[color:var(--text-secondary)]">${vendor}${p.vendor_username ? ' • @'+p.vendor_username : ''}</div>
               </div>
               <div class="text-lg font-semibold">${fmtUSD(p.precio)}</div>
             </div>
