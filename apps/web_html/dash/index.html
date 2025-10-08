@@ -135,7 +135,18 @@
         <div class="card">
           <h3 class="text-lg font-semibold mb-3">Proyectos en Colombia</h3>
           <div id="map" style="height:320px;border-radius:12px;overflow:hidden"></div>
-          <div id="my-projects" class="mt-3 text-sm text-[color:var(--text-secondary)]">Tus proyectos: —</div>
+        </div>
+      </section>
+
+      <!-- Mis proyectos -->
+      <section class="grid md:grid-cols-3 gap-4">
+        <div class="card md:col-span-1">
+          <h3 class="text-lg font-semibold mb-3">Mis proyectos</h3>
+          <div id="my-projects" class="text-sm text-[color:var(--text-secondary)]">Cargando...</div>
+        </div>
+        <div class="card md:col-span-2">
+          <h3 class="text-lg font-semibold mb-3">Generación e ingresos (12 meses)</h3>
+          <canvas id="myProjChart" height="120"></canvas>
         </div>
       </section>
     </main>
@@ -239,7 +250,24 @@
                 'bogota': [4.711, -74.072], 'medellin': [6.244, -75.581], 'cali':[3.452,-76.532], 'barranquilla':[10.963,-74.796],
                 'cartagena':[10.391,-75.479], 'bucaramanga':[7.119,-73.123], 'pereira':[4.813,-75.696], 'manizales':[5.07,-75.52]
               };
-              pj.forEach(p => {
+              // Mostrar proyectos del usuario (si autenticado) y dibujar sólo esos puntos
+              const token = localStorage.getItem('access');
+              let mine = [];
+              if (token){
+                try{
+                  const meR = await fetch(`${API}/api/me`, { headers:{ Authorization:'Bearer '+token }});
+                  const me = await meR.json();
+                  const username = (me?.username)||'';
+                  if (username){
+                    let mineR = await fetch(`${API}/api/projects/?owner_user=${encodeURIComponent(username)}&limit=10`);
+                    mine = await safeJson(mineR); if (!Array.isArray(mine) && mine?.results) mine = mine.results; if (!Array.isArray(mine)) mine = [];
+                  }
+                }catch{}
+              }
+              if (mine.length === 0) mine = pj.slice(0,2);
+
+              // Puntos en el mapa (solo mis proyectos)
+              mine.forEach(p => {
                 const lat = Number(p.lat), lng = Number(p.lng);
                 let latlng;
                 if (!isNaN(lat) && !isNaN(lng)) latlng = [lat, lng];
@@ -251,21 +279,31 @@
                 L.marker(latlng).addTo(map).bindPopup(`<strong>${p.ubicacion||'Proyecto'}</strong><br/>${p.potencia_kw} kW • ${p.estado}<br/>${p.descripcion||''}`);
               });
 
-              // Mostrar proyectos del usuario (si autenticado) y asignar por defecto 2 al perfil de David
-              const token = localStorage.getItem('access');
-              if (token){
-                try{
-                  const meR = await fetch(`${API}/api/me`, { headers:{ Authorization:'Bearer '+token }});
-                  const me = await meR.json();
-                  const username = (me?.username)||'';
-                  let mineR = await fetch(`${API}/api/projects/?owner_user=${encodeURIComponent(username)}&limit=10`);
-                  let mine = await safeJson(mineR); if (!Array.isArray(mine) && mine?.results) mine = mine.results; if (!Array.isArray(mine)) mine = [];
-                  if (mine.length === 0 && username){
-                    // Asignación simple: si el usuario no tiene proyectos, muestra dos públicos como "tuyos" en UI
-                    mine = pj.slice(0,2);
-                  }
-                  document.getElementById('my-projects').innerHTML = mine.length ? mine.map(p=>`${p.ubicacion} (${p.potencia_kw} kW)`).join(' • ') : 'Sin proyectos todavía.';
-                }catch{}
+              // Lista y gráfico de "Mis proyectos"
+              const myEl = document.getElementById('my-projects');
+              myEl.innerHTML = mine.length ? mine.map(p=>`${p.ubicacion} (${p.potencia_kw} kW)`).join(' • ') : 'Sin proyectos todavía.';
+
+              // Cargar mediciones por proyecto y graficar 12 meses
+              const last12 = (()=>{ const d=new Date(); const arr=[]; for(let i=11;i>=0;i--){ const dt=new Date(d.getFullYear(), d.getMonth()-i, 1); const y=dt.getFullYear(); const m=(dt.getMonth()+1).toString().padStart(2,'0'); arr.push(`${y}-${m}`);} return arr; })();
+              const monthLabels = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+              const labels = last12.map(s=>{ const [y,m]=s.split('-'); return monthLabels[Number(m)-1]; });
+              const USD_PER_KWH = 0.22;
+              const seriesKwh = new Array(12).fill(0);
+              // fetch measurements in parallel
+              const meas = await Promise.all(mine.map(p => fetch(`${API}/api/measurements/?proyecto=${p.id}`).then(safeJson).catch(()=>[])));
+              meas.forEach(arr => {
+                (arr||[]).forEach(m => {
+                  const idx = last12.indexOf(String(m.periodo||''));
+                  if (idx >= 0) seriesKwh[idx] += Number(m.kwh_gen||0);
+                });
+              });
+              const seriesUsd = seriesKwh.map(k => k * USD_PER_KWH);
+              const ctx2 = document.getElementById('myProjChart');
+              if (ctx2 && window.Chart){
+                new Chart(ctx2, { type:'bar', data:{ labels, datasets:[
+                  { type:'bar', label:'kWh', data: seriesKwh, backgroundColor:'rgba(59,130,246,0.4)' },
+                  { type:'line', label:'US$', data: seriesUsd, borderColor:'#22c55e', yAxisID:'y1' },
+                ]}, options:{ responsive:true, plugins:{ legend:{ display:true }}, scales:{ y:{ beginAtZero:true }, y1:{ position:'right', grid:{ drawOnChartArea:false }} } });
               }
             }catch{}
           }
