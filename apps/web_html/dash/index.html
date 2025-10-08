@@ -181,7 +181,9 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           try {
-            const r = await fetch(`${API}/api/token/`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: inline-user.value, password: inline-pass.value })});
+            const username = document.getElementById('inline-user').value;
+            const password = document.getElementById('inline-pass').value;
+            const r = await fetch(`${API}/api/token/`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password })});
             const d = await r.json();
             if (r.ok && d.access){ localStorage.setItem('access', d.access); if (d.refresh) localStorage.setItem('refresh', d.refresh); container.remove(); enableForms(); }
             else alert('Credenciales inválidas');
