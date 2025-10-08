@@ -5,7 +5,11 @@ services:
     plan: starter
     rootDir: apps/api_django
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: python manage.py migrate
+    preDeployCommand: |
+      python manage.py migrate --noinput
+      if [ "$SEED_DEMO" = "true" ]; then
+        python manage.py seed_demo
+      fi
     startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /healthz
     envVars:
@@ -17,6 +21,8 @@ services:
         value: wewin.space,www.wewin.space,api.wewin.space
       - key: DATABASE_URL
         sync: false
+      - key: SEED_DEMO
+        value: 'true'
       - key: CORS_ALLOW_ALL_ORIGINS
         value: 'false'
       - key: CORS_ALLOWED_ORIGINS
