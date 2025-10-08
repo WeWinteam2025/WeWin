@@ -27,6 +27,7 @@
             <a href="/dash/inversion.html" class="hover:opacity-80">Inversión</a>
             <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
             <a href="/blog/index.html" class="hover:opacity-80">Blog</a>
+            <a href="/dash/catalogo.html" id="cart-link" class="relative hover:opacity-80">Carrito <span id="cart-badge" class="ml-1 inline-flex items-center justify-center rounded-full bg-green-600 text-white text-[10px] leading-none px-1.5 py-0.5 align-top">0</span></a>
             <span id="auth-slot"></span>
           </nav>
         </div>
@@ -68,6 +69,9 @@
         if (location.hostname.includes('wewin.space')) return 'https://api.wewin.space';
         return 'http://localhost:8001';
       }
+      function updateCartBadge(){
+        try{ const cart = JSON.parse(localStorage.getItem('cart')||'[]'); document.getElementById('cart-badge').textContent = String(cart.reduce((a,i)=>a+(i.qty||1),0)); }catch{}
+      }
       async function loadCatalog(){
         const params = new URLSearchParams();
         if (f_marca.value) params.append('marca', f_marca.value);
@@ -90,6 +94,7 @@
               </div>
               <div class="text-lg font-semibold">${fmtUSD(p.precio)}</div>
             </div>
+            ${p.image_url ? `<img src="${p.image_url}" alt="${p.sku}" class="w-full h-32 object-cover rounded mt-2"/>` : ''}
             <div class="mt-2 flex flex-wrap gap-2">${tags}</div>
             <div class="mt-3 flex items-center justify-between">
               <div class="text-sm text-[color:var(--text-secondary)]">Stock: ${p.stock}</div>
@@ -110,11 +115,18 @@
             'Content-Type':'application/json', 'Authorization': 'Bearer '+token
           }, body: JSON.stringify({ producto: productId, cantidad })});
           const d = await res.json();
-          if (res.ok){ alert('Orden creada. Total: '+ (d.total||'OK')); }
+          if (res.ok){
+            const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+            cart.push({ productId, qty: cantidad, total: d.total });
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            alert('Orden creada. Total: '+ (d.total||'OK'));
+          }
           else { alert('No se pudo crear la orden.'); }
         }catch(e){ alert('Error de red'); }
       }
       loadCatalog();
+      updateCartBadge();
     </script>
   </body>
   </html>

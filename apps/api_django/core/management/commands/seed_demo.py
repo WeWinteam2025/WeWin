@@ -155,7 +155,16 @@ class Command(BaseCommand):
             ('MONITOR-IOT', 140, 90, {'tipo': 'monitoreo', 'conectividad': 'WiFi/LTE'}),
         ]
 
-        vendors = [actors['VENDOR'], actors['IMPORTER'], actors['INSTALLER']]
+        # Vendedores sintéticos con usuarios y clave demo
+        seller_names = ['solarcol','enercom','andessun','colsol','megawatt']
+        seller_users = []
+        for name in seller_names:
+            usr, _ = User.objects.get_or_create(username=name, defaults={'email': f'{name}@example.com'})
+            if not usr.has_usable_password(): usr.set_password('demo'); usr.save()
+            seller_actor, _ = Actor.objects.get_or_create(user=usr, type='VENDOR', defaults={'organization': org})
+            seller_users.append(seller_actor)
+
+        vendors = seller_users or [actors['VENDOR'], actors['IMPORTER'], actors['INSTALLER']]
         for i, (sku, price, stock, specs) in enumerate(catalog_items):
             Product.objects.get_or_create(
                 sku=sku,
@@ -165,6 +174,7 @@ class Command(BaseCommand):
                     'precio': price,
                     'stock': stock,
                     'specs': specs,
+                    'image_url': f'https://source.unsplash.com/400x240/?{specs.get("tipo","solar")},solar',
                 },
             )
 

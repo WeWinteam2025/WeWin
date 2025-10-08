@@ -22,6 +22,9 @@
           <a href="/dash/ppa.html" class="hover:opacity-80">PPA</a>
           <a href="/dash/stakeholders.html" class="hover:opacity-80">Stakeholders</a>
           <a href="/dash/catalogo.html" class="hover:opacity-80">Catálogo</a>
+          <a href="/dash/catalogo.html" id="cart-link" class="relative hover:opacity-80">
+            Carrito <span id="cart-badge" class="ml-1 inline-flex items-center justify-center rounded-full bg-green-600 text-white text-[10px] leading-none px-1.5 py-0.5 align-top">0</span>
+          </a>
           <span id="auth-slot"></span>
         </nav>
       </div>
@@ -43,7 +46,14 @@
                 if (btn) btn.addEventListener('click', function(){ localStorage.removeItem('access'); localStorage.removeItem('refresh'); window.location.href = '/auth/login.html'; });
               }).catch(function(){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; });
           }
-          document.addEventListener('DOMContentLoaded', renderAuth);
+          document.addEventListener('DOMContentLoaded', function(){
+            renderAuth();
+            // init cart badge
+            try{
+              var cart = JSON.parse(localStorage.getItem('cart')||'[]');
+              document.getElementById('cart-badge').textContent = String(cart.reduce((a,i)=>a + (i.qty||1),0));
+            }catch{}
+          });
         })();
       </script>
     </header>

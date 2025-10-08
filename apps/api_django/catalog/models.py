@@ -9,6 +9,7 @@ class Product(models.Model):
     specs = models.JSONField(default=dict, blank=True)
     precio = models.DecimalField(max_digits=12, decimal_places=2)
     stock = models.IntegerField(default=0)
+    image_url = models.URLField(blank=True, default='')
 
 
 class B2BOrder(models.Model):
