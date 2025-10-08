@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('catalog', '0002_investment'),
+        ('catalog', '0002_b2border'),
     ]
 
     operations = [
