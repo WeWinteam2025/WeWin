@@ -6,9 +6,11 @@ services:
     rootDir: apps/api_django
     buildCommand: pip install -r requirements.txt
     preDeployCommand: |
+      set -e
       python manage.py migrate --noinput
-      if [ "$SEED_DEMO" = "true" ]; then
-        python manage.py seed_demo
+      if [ "${SEED_DEMO}" = "true" ]; then
+        # Semilla no-fatal: si falla, no tumba el deploy
+        python manage.py seed_demo || echo "seed_demo fallo (no-fatal)"
       fi
     startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /healthz
