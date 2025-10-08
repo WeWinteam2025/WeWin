@@ -96,7 +96,7 @@
         if (id && id !== 'ID') return id;
         if (slug){
           try{
-            const r = await fetch(`${getAPI()}/api/core/projects/by_slug/?slug=${encodeURIComponent(slug)}`);
+            const r = await fetch(`${getAPI()}/api/projects/by_slug/?slug=${encodeURIComponent(slug)}`);
             if (r.ok){ const p = await r.json(); id = String(p.id); return id; }
           }catch{}
         }
