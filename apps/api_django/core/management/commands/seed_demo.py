@@ -105,7 +105,17 @@ class Command(BaseCommand):
                 gen = int(base_kw * 120 * factor)  # kWh mensual aproximado
                 cons = int(gen * 0.78)
                 exced = gen - cons
-                Measurement.objects.get_or_create(proyecto=proj, periodo=periodo, defaults={'kwh_gen': gen, 'kwh_cons': cons, 'kwh_exced': exced})
+                obj, created = Measurement.objects.get_or_create(
+                    proyecto=proj, periodo=periodo,
+                    defaults={'kwh_gen': gen, 'kwh_cons': cons, 'kwh_exced': exced}
+                )
+                if not created:
+                    # actualizar valores si ya existían
+                    if obj.kwh_gen != gen or obj.kwh_cons != cons or obj.kwh_exced != exced:
+                        obj.kwh_gen = gen
+                        obj.kwh_cons = cons
+                        obj.kwh_exced = exced
+                        obj.save()
                 m += 1
                 if m > 12: m = 1; y += 1
 
