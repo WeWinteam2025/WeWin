@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>We Win • Dashboard Comunidad</title>
     <link rel="stylesheet" href="/src/style.css" />
-    <script src="/config.js"></script>
+    <script src="/config.js?v=1735248000"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body class="min-h-screen">
@@ -157,193 +157,221 @@
     <script>
       (function(){
         var API = window.API_BASE || (location.hostname.indexOf('wewin.space')>=0?'https://api.wewin.space':'http://localhost:8001');
-        function sj(r){ try{ return r.json(); }catch(e){ return []; } }
-        function avg(arr, field){ var xs = []; for (var i=0;i<arr.length;i++){ var n = Number(arr[i][field]||0); if (!isNaN(n)&&isFinite(n)) xs.push(n);} if(!xs.length) return 0; var s=0; for (var j=0;j<xs.length;j++) s+=xs[j]; return s/xs.length; }
+        
+        function safeJson(r){ try { return r.json(); } catch { return []; } }
+        function avg(arr, field){ 
+          var xs = []; 
+          for (var i=0;i<arr.length;i++){ 
+            var n = Number(arr[i][field]||0); 
+            if(!isNaN(n)&&isFinite(n)) xs.push(n);
+          } 
+          if(!xs.length) return 0; 
+          var s=0; 
+          for (var j=0;j<xs.length;j++) s+=xs[j]; 
+          return s/xs.length; 
+        }
+        
         function setText(id, val){ var el=document.getElementById(id); if(el) el.textContent = val; }
         function setHTML(id, html){ var el=document.getElementById(id); if(el) el.innerHTML = html; }
-
         function fmt(n){ return new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(n); }
 
-        Promise.all([
-          fetch(API + '/api/offers/public'),
-          fetch(API + '/api/demands/public'),
-          fetch(API + '/api/ce')
-        ]).then(function(res){ return Promise.all(res.map(sj)); }).then(function(vals){
-          var offers = Array.isArray(vals[0])?vals[0]:(vals[0]&&vals[0].results)||[];
-          var demands = Array.isArray(vals[1])?vals[1]:(vals[1]&&vals[1].results)||[];
-          var ce = Array.isArray(vals[2])?vals[2]:(vals[2]&&vals[2].results)||[];
-          setText('kpi-ce', String(ce.length));
-          var aO = avg(offers,'precio_ref');
-          var aD = avg(demands,'precio_obj');
-          setText('kpi-oferta', aO? aO.toFixed(4):'—');
-          setText('kpi-demanda', aD? aD.toFixed(4):'—');
-          var offersHtml = offers.slice(0,6).map(function(o){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(o.precio_ref||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+fmt(o.capacidad_kw||0)+' kW</span></div>'; }).join('');
-          if (!offersHtml) offersHtml = '<div class="text-[color:var(--text-secondary)]">Sin ofertas.</div>';
-          setHTML('list-offers', offersHtml);
-          var demandsHtml = demands.slice(0,6).map(function(d){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(d.precio_obj||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+(d.estado||'')+'</span></div>'; }).join('');
-          if (!demandsHtml) demandsHtml = '<div class="text-[color:var(--text-secondary)]">Sin demandas.</div>';
-          setHTML('list-demands', demandsHtml);
-          var ceHtml = ce.slice(0,6).map(function(c){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+(c.nombre||'Comunidad')+'</span><span class="text-[color:var(--text-secondary)]">'+(c.miembros||0)+' miembros</span></div>'; }).join('');
-          if (!ceHtml) ceHtml = '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
-          setHTML('list-ce', ceHtml);
-        }).catch(function(){});
-      })();
-
-      // HTMX auth header
-      document.addEventListener('htmx:configRequest', (evt) => {
-        const token = localStorage.getItem('access');
-        if (token) evt.detail.headers['Authorization'] = 'Bearer ' + token;
-      });
-
-      // Inline login renderer
-      function renderInlineLogin(targetId){
-        const container = document.getElementById(targetId);
-        if (!container) return;
-        container.classList.remove('hidden');
-        container.innerHTML = `
-          <div class="rounded border border-slate-200 p-3 bg-white/60">
-            <p class="mb-2">Inicia sesión para usar esta acción.</p>
-            <form id="inline-login" class="grid grid-cols-1 gap-2 md:grid-cols-3 items-end">
-              <input id="inline-user" class="input" placeholder="usuario o email" />
-              <input id="inline-pass" type="password" class="input" placeholder="contraseña" />
-              <button class="btn-primary" type="submit">Entrar</button>
-            </form>
-          </div>`;
-        const form = document.getElementById('inline-login');
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          try {
-            const username = document.getElementById('inline-user').value;
-            const password = document.getElementById('inline-pass').value;
-            const r = await fetch(`${API}/api/token/`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password })});
-            const d = await r.json();
-            if (r.ok && d.access){ localStorage.setItem('access', d.access); if (d.refresh) localStorage.setItem('refresh', d.refresh); container.remove(); enableForms(); }
-            else alert('Credenciales inválidas');
-          } catch { alert('Error de red'); }
+        // HTMX auth header
+        document.addEventListener('htmx:configRequest', function(evt){
+          var token = localStorage.getItem('access');
+          if (token) evt.detail.headers['Authorization'] = 'Bearer ' + token;
         });
-      }
 
-      function disableForms(){ ['offer-form','demand-form'].forEach(id=>{ const f=document.getElementById(id); if (f){ f.style.pointerEvents='none'; f.style.opacity='0.6'; }}); }
-      function enableForms(){ ['offer-form','demand-form'].forEach(id=>{ const f=document.getElementById(id); if (f){ f.style.pointerEvents='auto'; f.style.opacity='1'; }}); }
+        // Inline login renderer
+        function renderInlineLogin(targetId){
+          var container = document.getElementById(targetId);
+          if (!container) return;
+          container.classList.remove('hidden');
+          var html = '';
+          html += '<div class="rounded border border-slate-200 p-3 bg-white/60">';
+          html += '<p class="mb-2">Inicia sesión para usar esta acción.</p>';
+          html += '<form id="inline-login" class="grid grid-cols-1 gap-2 md:grid-cols-3 items-end">';
+          html += '<input id="inline-user" class="input" placeholder="usuario o email" />';
+          html += '<input id="inline-pass" type="password" class="input" placeholder="contraseña" />';
+          html += '<button class="btn-primary" type="submit">Entrar</button>';
+          html += '</form></div>';
+          container.innerHTML = html;
+          var form = document.getElementById('inline-login');
+          form.addEventListener('submit', function(e){
+            e.preventDefault();
+            var username = document.getElementById('inline-user').value;
+            var password = document.getElementById('inline-pass').value;
+            fetch(API + '/api/token/', { 
+              method:'POST', 
+              headers:{'Content-Type':'application/json'}, 
+              body: JSON.stringify({ username: username, password: password })
+            })
+            .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+            .then(function(res){ 
+              if (res.ok && res.d && res.d.access){ 
+                localStorage.setItem('access', res.d.access); 
+                if (res.d.refresh) localStorage.setItem('refresh', res.d.refresh); 
+                container.remove(); 
+                enableForms(); 
+              } else { 
+                alert('Credenciales inválidas'); 
+              } 
+            })
+            .catch(function(){ alert('Error de red'); });
+          });
+        }
 
-      (function gate(){ const token = localStorage.getItem('access'); if (!token){ disableForms(); renderInlineLogin('gate-offer'); renderInlineLogin('gate-demand'); } })();
+        function disableForms(){ 
+          ['offer-form','demand-form'].forEach(function(id){ 
+            var f=document.getElementById(id); 
+            if (f){ f.style.pointerEvents='none'; f.style.opacity='0.6'; }
+          }); 
+        }
+        function enableForms(){ 
+          ['offer-form','demand-form'].forEach(function(id){ 
+            var f=document.getElementById(id); 
+            if (f){ f.style.pointerEvents='auto'; f.style.opacity='1'; }
+          }); 
+        }
 
-      async function safeJson(r){ try { return await r.json(); } catch { return []; } }
-      function avg(arr, field){ const xs = arr.map(x=> Number(x[field]||0)).filter(n=>!isNaN(n) && isFinite(n)); if (!xs.length) return 0; return xs.reduce((a,b)=>a+b,0)/xs.length; }
+        function gate(){ 
+          var token = localStorage.getItem('access'); 
+          if (!token){ 
+            disableForms(); 
+            renderInlineLogin('gate-offer'); 
+            renderInlineLogin('gate-demand'); 
+          } 
+        }
 
-      async function loadData(){
-        try {
-          const [offR, demR, ceR] = await Promise.all([
-            fetch(API + '/api/offers/public'),
-            fetch(API + '/api/demands/public'),
-            fetch(API + '/api/ce')
-          ]);
-          let offers = await safeJson(offR); if (!Array.isArray(offers) && offers?.results) offers = offers.results; if (!Array.isArray(offers)) offers = [];
-          let demands = await safeJson(demR); if (!Array.isArray(demands) && demands?.results) demands = demands.results; if (!Array.isArray(demands)) demands = [];
-          let ce = await safeJson(ceR); if (!Array.isArray(ce) && ce?.results) ce = ce.results; if (!Array.isArray(ce)) ce = [];
+        async function loadData(){
+          try {
+            var offR = await fetch(API + '/api/offers/public');
+            var demR = await fetch(API + '/api/demands/public');
+            var ceR = await fetch(API + '/api/ce');
+            
+            var offers = await safeJson(offR); 
+            if (!Array.isArray(offers) && offers && offers.results) offers = offers.results; 
+            if (!Array.isArray(offers)) offers = [];
+            
+            var demands = await safeJson(demR); 
+            if (!Array.isArray(demands) && demands && demands.results) demands = demands.results; 
+            if (!Array.isArray(demands)) demands = [];
+            
+            var ce = await safeJson(ceR); 
+            if (!Array.isArray(ce) && ce && ce.results) ce = ce.results; 
+            if (!Array.isArray(ce)) ce = [];
 
-          document.getElementById('kpi-ce').textContent = String(ce.length);
-          const aO = avg(offers,'precio_ref');
-          const aD = avg(demands,'precio_obj');
-          document.getElementById('kpi-oferta').textContent = aO ? aO.toFixed(4) : '—';
-          document.getElementById('kpi-demanda').textContent = aD ? aD.toFixed(4) : '—';
-          const cap = offers.map(o=> Number(o.capacidad_kw||0)).filter(n=>!isNaN(n));
-          const kwh = cap.reduce((a,b)=>a+b,0) * 4; // proxy diario
-          const co2 = kwh * 0.45 / 1000; // tCO2 aprox por MWh
-          document.getElementById('kpi-co2').textContent = co2 ? co2.toFixed(2) : '—';
+            setText('kpi-ce', String(ce.length));
+            var aO = avg(offers,'precio_ref');
+            var aD = avg(demands,'precio_obj');
+            setText('kpi-oferta', aO ? aO.toFixed(4) : '—');
+            setText('kpi-demanda', aD ? aD.toFixed(4) : '—');
+            
+            var cap = offers.map(function(o){ return Number(o.capacidad_kw||0); }).filter(function(n){ return !isNaN(n); });
+            var kwh = cap.reduce(function(a,b){ return a+b; }, 0) * 4;
+            var co2 = kwh * 0.45 / 1000;
+            setText('kpi-co2', co2 ? co2.toFixed(2) : '—');
 
-          // render lists
-          const fmt = (n)=> new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(n);
-          const offersHtml = offers.slice(0,6).map(o=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${fmt(o.precio_ref||0)} US$/kWh</span><span class="text-[color:var(--text-secondary)]">${fmt(o.capacidad_kw||0)} kW</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin ofertas.</div>';
-          document.getElementById('list-offers').innerHTML = offersHtml;
-          const demandsHtml = demands.slice(0,6).map(d=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${fmt(d.precio_obj||0)} US$/kWh</span><span class="text-[color:var(--text-secondary)]">${d.estado||''}</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin demandas.</div>';
-          document.getElementById('list-demands').innerHTML = demandsHtml;
-          const ceHtml = ce.slice(0,6).map(c=>`<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>${c.nombre||'Comunidad'}</span><span class="text-[color:var(--text-secondary)]">${c.miembros||0} miembros</span></div>`).join('') || '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
-          document.getElementById('list-ce').innerHTML = ceHtml;
+            var offersHtml = offers.slice(0,6).map(function(o){ 
+              return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(o.precio_ref||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+fmt(o.capacidad_kw||0)+' kW</span></div>'; 
+            }).join('') || '<div class="text-[color:var(--text-secondary)]">Sin ofertas.</div>';
+            setHTML('list-offers', offersHtml);
+            
+            var demandsHtml = demands.slice(0,6).map(function(d){ 
+              return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(d.precio_obj||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+(d.estado||'')+'</span></div>'; 
+            }).join('') || '<div class="text-[color:var(--text-secondary)]">Sin demandas.</div>';
+            setHTML('list-demands', demandsHtml);
+            
+            var ceHtml = ce.slice(0,6).map(function(c){ 
+              return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+(c.nombre||'Comunidad')+'</span><span class="text-[color:var(--text-secondary)]">'+(c.miembros||0)+' miembros</span></div>'; 
+            }).join('') || '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
+            setHTML('list-ce', ceHtml);
 
-          // Render ingresos estimados (mock a partir de ofertas)
-          const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-          const base = (aO || 0.22) * 10000; // proxy ingresos
-          const series = months.map((_,i)=> (base * (0.9 + Math.sin(i/2)*0.05 + i*0.01)).toFixed(0));
-          const ctx = document.getElementById('revChart');
-          if (ctx && window.Chart){
-            new Chart(ctx, { type:'line', data:{ labels: months, datasets:[{ label:'US$', data: series, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.15)', tension:0.35, fill:true }]}, options:{ plugins:{ legend:{ display:false }}, scales:{ y:{ ticks:{ callback:(v)=>'$'+v }}} }});
-          }
+            // Render ingresos estimados
+            var months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+            var base = (aO || 0.22) * 10000;
+            var series = months.map(function(_,i){ return (base * (0.9 + Math.sin(i/2)*0.05 + i*0.01)).toFixed(0); });
+            var ctx = document.getElementById('revChart');
+            if (ctx && window.Chart){
+              new Chart(ctx, { 
+                type:'line', 
+                data:{ 
+                  labels: months, 
+                  datasets:[{ 
+                    label:'US$', 
+                    data: series, 
+                    borderColor:'#22c55e', 
+                    backgroundColor:'rgba(34,197,94,0.15)', 
+                    tension:0.35, 
+                    fill:true 
+                  }]
+                }, 
+                options:{ 
+                  plugins:{ legend:{ display:false }}, 
+                  scales:{ y:{ ticks:{ callback:function(v){ return '$'+v; }}}} 
+                }
+              });
+            }
 
-          // Render mapa Colombia con proyectos (ubicación proxy por ciudad en nombre)
-          const mapEl = document.getElementById('map');
-          if (mapEl && window.L){
-            const map = L.map('map').setView([4.7,-74.1], 5.2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-            // Cargar proyectos públicos activos
-            try{
-              let pr = await fetch(API + '/api/projects/?only_active=1&limit=50');
-              let pj = await safeJson(pr); if (!Array.isArray(pj) && pj?.results) pj = pj.results; if (!Array.isArray(pj)) pj = [];
-              // Render markers (usa coordenadas si existen; si no, geolocalización simple por nombre)
-              const fallbackGeo = {
+            // Render mapa
+            var mapEl = document.getElementById('map');
+            if (mapEl && window.L){
+              var map = L.map('map').setView([4.7,-74.1], 5.2);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+              
+              var fallbackGeo = {
                 'bogota': [4.711, -74.072], 'medellin': [6.244, -75.581], 'cali':[3.452,-76.532], 'barranquilla':[10.963,-74.796],
                 'cartagena':[10.391,-75.479], 'bucaramanga':[7.119,-73.123], 'pereira':[4.813,-75.696], 'manizales':[5.07,-75.52]
               };
-              // Mostrar proyectos del usuario (si autenticado) y dibujar sólo esos puntos
-              const token = localStorage.getItem('access');
-              let mine = [];
+              
+              var token = localStorage.getItem('access');
+              var mine = [];
               if (token){
                 try{
-                  const meR = await fetch(API + '/api/me', { headers:{ Authorization:'Bearer '+token }});
-                  const me = await meR.json();
-                  const username = (me?.username)||'';
+                  var meR = await fetch(API + '/api/me', { headers:{ Authorization:'Bearer '+token }});
+                  var me = await meR.json();
+                  var username = me && me.username ? me.username : '';
                   if (username){
-                    let mineR = await fetch(API + '/api/projects/?owner_user=' + encodeURIComponent(username) + '&limit=10');
-                    mine = await safeJson(mineR); if (!Array.isArray(mine) && mine?.results) mine = mine.results; if (!Array.isArray(mine)) mine = [];
+                    var mineR = await fetch(API + '/api/projects/?owner_user=' + encodeURIComponent(username) + '&limit=10');
+                    mine = await safeJson(mineR); 
+                    if (!Array.isArray(mine) && mine && mine.results) mine = mine.results; 
+                    if (!Array.isArray(mine)) mine = [];
                   }
-                }catch{}
+                }catch(e){}
               }
-              if (mine.length === 0) mine = pj.slice(0,2);
+              
+              if (mine.length === 0) {
+                try{
+                  var pr = await fetch(API + '/api/projects/?only_active=1&limit=50');
+                  var pj = await safeJson(pr); 
+                  if (!Array.isArray(pj) && pj && pj.results) pj = pj.results; 
+                  if (!Array.isArray(pj)) pj = [];
+                  mine = pj.slice(0,2);
+                }catch(e){}
+              }
 
-              // Puntos en el mapa (solo mis proyectos)
-              mine.forEach(p => {
-                const lat = Number(p.lat), lng = Number(p.lng);
-                let latlng;
-                if (!isNaN(lat) && !isNaN(lng)) latlng = [lat, lng];
-                else {
-                  const name = String(p.ubicacion||'').toLowerCase();
-                  const key = Object.keys(fallbackGeo).find(k => name.includes(k));
+              mine.forEach(function(p) {
+                var lat = Number(p.lat), lng = Number(p.lng);
+                var latlng;
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  latlng = [lat, lng];
+                } else {
+                  var name = String(p.ubicacion||'').toLowerCase();
+                  var key = Object.keys(fallbackGeo).find(function(k) { return name.includes(k); });
                   latlng = key ? fallbackGeo[key] : [4.7,-74.1];
                 }
-                L.marker(latlng).addTo(map).bindPopup(`<strong>${p.ubicacion||'Proyecto'}</strong><br/>${p.potencia_kw} kW • ${p.estado}<br/>${p.descripcion||''}`);
+                L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw)+' kW • '+(p.estado)+'<br/>'+(p.descripcion||''));
               });
 
-              // Lista y gráfico de "Mis proyectos"
-              const myEl = document.getElementById('my-projects');
-              myEl.innerHTML = mine.length ? mine.map(p=>`${p.ubicacion} (${p.potencia_kw} kW)`).join(' • ') : 'Sin proyectos todavía.';
-
-              // Cargar mediciones por proyecto y graficar 12 meses
-              const last12 = (()=>{ const d=new Date(); const arr=[]; for(let i=11;i>=0;i--){ const dt=new Date(d.getFullYear(), d.getMonth()-i, 1); const y=dt.getFullYear(); const m=(dt.getMonth()+1).toString().padStart(2,'0'); arr.push(`${y}-${m}`);} return arr; })();
-              const monthLabels = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-              const labels = last12.map(s=>{ const [y,m]=s.split('-'); return monthLabels[Number(m)-1]; });
-              const USD_PER_KWH = 0.22;
-              const seriesKwh = new Array(12).fill(0);
-              // fetch measurements in parallel
-              const meas = await Promise.all(mine.map(function(p){ return fetch(API + '/api/measurements/?proyecto=' + p.id).then(safeJson).catch(function(){ return []; }); }));
-              meas.forEach(arr => {
-                (arr||[]).forEach(m => {
-                  const idx = last12.indexOf(String(m.periodo||''));
-                  if (idx >= 0) seriesKwh[idx] += Number(m.kwh_gen||0);
-                });
-              });
-              const seriesUsd = seriesKwh.map(k => k * USD_PER_KWH);
-              const ctx2 = document.getElementById('myProjChart');
-              if (ctx2 && window.Chart){
-                new Chart(ctx2, { type:'bar', data:{ labels: labels, datasets:[
-                  { type:'bar', label:'kWh', data: seriesKwh, backgroundColor:'rgba(59,130,246,0.4)' },
-                  { type:'line', label:'US$', data: seriesUsd, borderColor:'#22c55e', yAxisID:'y1' },
-                ]}, options:{ responsive:true, plugins:{ legend:{ display:true }}, scales:{ y:{ beginAtZero:true }, y1:{ position:'right', grid:{ drawOnChartArea:false }} } });
-              }
-            }catch{}
-          }
-        } catch(e){ console.warn(e); }
-      }
-      loadData();
+              var myEl = document.getElementById('my-projects');
+              myEl.innerHTML = mine.length ? mine.map(function(p){ return (p.ubicacion)+' ('+(p.potencia_kw)+' kW)'; }).join(' • ') : 'Sin proyectos todavía.';
+            }
+          } catch(e){ console.warn(e); }
+        }
+        
+        // Initialize
+        gate();
+        loadData();
+      })();
     </script>
   </body>
   </html>

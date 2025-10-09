@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>We Win • Ingresar</title>
     <link rel="stylesheet" href="/src/style.css" />
-    <script src="/config.js"></script>
+    <script src="/config.js?v=1735248000"></script>
   </head>
   <body class="min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md card">
@@ -23,7 +23,7 @@
       </form>
       <p class="text-sm text-[color:var(--text-secondary)] mt-4">¿No tienes cuenta? <a href="/auth/register.html">Crear cuenta</a></p>
       <script>
-        const API = window.API_BASE || 'http://localhost:8001';
+        const API = (window.API_BASE || (location.hostname.indexOf('wewin.space')>=0?'https://api.wewin.space':'http://localhost:8001'));
         document.getElementById('login-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const username = document.getElementById('email').value;
@@ -38,7 +38,7 @@
             if (res.ok && data.access) {
               localStorage.setItem('access', data.access);
               localStorage.setItem('refresh', data.refresh || '');
-              window.location.href = '/dash/energia.html';
+              window.location.href = '/dash/index.html';
             } else {
               alert('Login inválido');
             }
