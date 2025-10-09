@@ -154,9 +154,40 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="/dash/main.js"></script>
     <script>
-      window.API = window.API_BASE || 'http://localhost:8001';
+      (function(){
+        var API = window.API_BASE || (location.hostname.indexOf('wewin.space')>=0?'https://api.wewin.space':'http://localhost:8001');
+        function sj(r){ try{ return r.json(); }catch(e){ return []; } }
+        function avg(arr, field){ var xs = []; for (var i=0;i<arr.length;i++){ var n = Number(arr[i][field]||0); if (!isNaN(n)&&isFinite(n)) xs.push(n);} if(!xs.length) return 0; var s=0; for (var j=0;j<xs.length;j++) s+=xs[j]; return s/xs.length; }
+        function setText(id, val){ var el=document.getElementById(id); if(el) el.textContent = val; }
+        function setHTML(id, html){ var el=document.getElementById(id); if(el) el.innerHTML = html; }
+
+        function fmt(n){ return new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(n); }
+
+        Promise.all([
+          fetch(API + '/api/offers/public'),
+          fetch(API + '/api/demands/public'),
+          fetch(API + '/api/ce')
+        ]).then(function(res){ return Promise.all(res.map(sj)); }).then(function(vals){
+          var offers = Array.isArray(vals[0])?vals[0]:(vals[0]&&vals[0].results)||[];
+          var demands = Array.isArray(vals[1])?vals[1]:(vals[1]&&vals[1].results)||[];
+          var ce = Array.isArray(vals[2])?vals[2]:(vals[2]&&vals[2].results)||[];
+          setText('kpi-ce', String(ce.length));
+          var aO = avg(offers,'precio_ref');
+          var aD = avg(demands,'precio_obj');
+          setText('kpi-oferta', aO? aO.toFixed(4):'—');
+          setText('kpi-demanda', aD? aD.toFixed(4):'—');
+          var offersHtml = offers.slice(0,6).map(function(o){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(o.precio_ref||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+fmt(o.capacidad_kw||0)+' kW</span></div>'; }).join('');
+          if (!offersHtml) offersHtml = '<div class="text-[color:var(--text-secondary)]">Sin ofertas.</div>';
+          setHTML('list-offers', offersHtml);
+          var demandsHtml = demands.slice(0,6).map(function(d){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+fmt(d.precio_obj||0)+' US$/kWh</span><span class="text-[color:var(--text-secondary)]">'+(d.estado||'')+'</span></div>'; }).join('');
+          if (!demandsHtml) demandsHtml = '<div class="text-[color:var(--text-secondary)]">Sin demandas.</div>';
+          setHTML('list-demands', demandsHtml);
+          var ceHtml = ce.slice(0,6).map(function(c){ return '<div class="border-b last:border-0 py-2 text-sm flex items-center justify-between"><span>'+(c.nombre||'Comunidad')+'</span><span class="text-[color:var(--text-secondary)]">'+(c.miembros||0)+' miembros</span></div>'; }).join('');
+          if (!ceHtml) ceHtml = '<div class="text-[color:var(--text-secondary)]">Sin comunidades.</div>';
+          setHTML('list-ce', ceHtml);
+        }).catch(function(){});
+      })();
 
       // HTMX auth header
       document.addEventListener('htmx:configRequest', (evt) => {
