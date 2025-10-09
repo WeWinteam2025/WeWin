@@ -242,21 +242,24 @@
           } 
         }
 
-        async function loadData(){
-          try {
-            var offR = await fetch(API + '/api/offers/public');
-            var demR = await fetch(API + '/api/demands/public');
-            var ceR = await fetch(API + '/api/ce');
+        function loadData(){
+          Promise.all([
+            fetch(API + '/api/offers/public'),
+            fetch(API + '/api/demands/public'),
+            fetch(API + '/api/ce')
+          ]).then(function(responses){
+            return Promise.all(responses.map(function(r){ return safeJson(r); }));
+          }).then(function(results){
+            var offers = results[0];
+            var demands = results[1];
+            var ce = results[2];
             
-            var offers = await safeJson(offR); 
             if (!Array.isArray(offers) && offers && offers.results) offers = offers.results; 
             if (!Array.isArray(offers)) offers = [];
             
-            var demands = await safeJson(demR); 
             if (!Array.isArray(demands) && demands && demands.results) demands = demands.results; 
             if (!Array.isArray(demands)) demands = [];
             
-            var ce = await safeJson(ceR); 
             if (!Array.isArray(ce) && ce && ce.results) ce = ce.results; 
             if (!Array.isArray(ce)) ce = [];
 
@@ -326,46 +329,80 @@
               var token = localStorage.getItem('access');
               var mine = [];
               if (token){
-                try{
-                  var meR = await fetch(API + '/api/me', { headers:{ Authorization:'Bearer '+token }});
-                  var me = await meR.json();
-                  var username = me && me.username ? me.username : '';
-                  if (username){
-                    var mineR = await fetch(API + '/api/projects/?owner_user=' + encodeURIComponent(username) + '&limit=10');
-                    mine = await safeJson(mineR); 
-                    if (!Array.isArray(mine) && mine && mine.results) mine = mine.results; 
-                    if (!Array.isArray(mine)) mine = [];
-                  }
-                }catch(e){}
-              }
-              
-              if (mine.length === 0) {
-                try{
-                  var pr = await fetch(API + '/api/projects/?only_active=1&limit=50');
-                  var pj = await safeJson(pr); 
-                  if (!Array.isArray(pj) && pj && pj.results) pj = pj.results; 
-                  if (!Array.isArray(pj)) pj = [];
-                  mine = pj.slice(0,2);
-                }catch(e){}
-              }
+                fetch(API + '/api/me', { headers:{ Authorization:'Bearer '+token }})
+                  .then(function(meR){ return meR.json(); })
+                  .then(function(me){
+                    var username = me && me.username ? me.username : '';
+                    if (username){
+                      return fetch(API + '/api/projects/?owner_user=' + encodeURIComponent(username) + '&limit=10')
+                        .then(function(mineR){ return safeJson(mineR); })
+                        .then(function(data){
+                          if (!Array.isArray(data) && data && data.results) data = data.results; 
+                          if (!Array.isArray(data)) data = [];
+                          return data;
+                        });
+                    }
+                    return [];
+                  })
+                  .then(function(data){
+                    mine = data;
+                    if (mine.length === 0) {
+                      return fetch(API + '/api/projects/?only_active=1&limit=50')
+                        .then(function(pr){ return safeJson(pr); })
+                        .then(function(pj){
+                          if (!Array.isArray(pj) && pj && pj.results) pj = pj.results; 
+                          if (!Array.isArray(pj)) pj = [];
+                          mine = pj.slice(0,2);
+                        });
+                    }
+                  })
+                  .then(function(){
+                    mine.forEach(function(p) {
+                      var lat = Number(p.lat), lng = Number(p.lng);
+                      var latlng;
+                      if (!isNaN(lat) && !isNaN(lng)) {
+                        latlng = [lat, lng];
+                      } else {
+                        var name = String(p.ubicacion||'').toLowerCase();
+                        var key = Object.keys(fallbackGeo).find(function(k) { return name.includes(k); });
+                        latlng = key ? fallbackGeo[key] : [4.7,-74.1];
+                      }
+                      L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw)+' kW • '+(p.estado)+'<br/>'+(p.descripcion||''));
+                    });
 
-              mine.forEach(function(p) {
-                var lat = Number(p.lat), lng = Number(p.lng);
-                var latlng;
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  latlng = [lat, lng];
-                } else {
-                  var name = String(p.ubicacion||'').toLowerCase();
-                  var key = Object.keys(fallbackGeo).find(function(k) { return name.includes(k); });
-                  latlng = key ? fallbackGeo[key] : [4.7,-74.1];
-                }
-                L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw)+' kW • '+(p.estado)+'<br/>'+(p.descripcion||''));
-              });
+                    var myEl = document.getElementById('my-projects');
+                    myEl.innerHTML = mine.length ? mine.map(function(p){ return (p.ubicacion)+' ('+(p.potencia_kw)+' kW)'; }).join(' • ') : 'Sin proyectos todavía.';
+                  })
+                  .catch(function(e){ console.warn(e); });
+              } else {
+                // Sin token, mostrar proyectos públicos
+                fetch(API + '/api/projects/?only_active=1&limit=50')
+                  .then(function(pr){ return safeJson(pr); })
+                  .then(function(pj){
+                    if (!Array.isArray(pj) && pj && pj.results) pj = pj.results; 
+                    if (!Array.isArray(pj)) pj = [];
+                    mine = pj.slice(0,2);
+                    
+                    mine.forEach(function(p) {
+                      var lat = Number(p.lat), lng = Number(p.lng);
+                      var latlng;
+                      if (!isNaN(lat) && !isNaN(lng)) {
+                        latlng = [lat, lng];
+                      } else {
+                        var name = String(p.ubicacion||'').toLowerCase();
+                        var key = Object.keys(fallbackGeo).find(function(k) { return name.includes(k); });
+                        latlng = key ? fallbackGeo[key] : [4.7,-74.1];
+                      }
+                      L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw)+' kW • '+(p.estado)+'<br/>'+(p.descripcion||''));
+                    });
 
-              var myEl = document.getElementById('my-projects');
-              myEl.innerHTML = mine.length ? mine.map(function(p){ return (p.ubicacion)+' ('+(p.potencia_kw)+' kW)'; }).join(' • ') : 'Sin proyectos todavía.';
+                    var myEl = document.getElementById('my-projects');
+                    myEl.innerHTML = mine.length ? mine.map(function(p){ return (p.ubicacion)+' ('+(p.potencia_kw)+' kW)'; }).join(' • ') : 'Sin proyectos todavía.';
+                  })
+                  .catch(function(e){ console.warn(e); });
+              }
             }
-          } catch(e){ console.warn(e); }
+          }).catch(function(e){ console.warn(e); });
         }
         
         // Initialize
