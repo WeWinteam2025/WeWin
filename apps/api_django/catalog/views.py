@@ -41,10 +41,17 @@ class B2BOrderViewSet(viewsets.ModelViewSet):
         producto_id = request.data.get('producto')
         cantidad = int(request.data.get('cantidad', 1))
         comprador = request.data.get('comprador')
+        if not comprador and request.user and request.user.is_authenticated:
+            actor = getattr(request.user, 'actors', None)
+            actor = actor.first() if actor else None
+            if actor:
+                comprador = actor.id
         try:
             p = Product.objects.get(id=producto_id)
         except Product.DoesNotExist:
             return Response({'error': 'producto no encontrado'}, status=404)
+        if not comprador:
+            return Response({'error': 'comprador requerido'}, status=400)
         total = float(p.precio) * cantidad
         order = B2BOrder.objects.create(comprador_id=comprador, producto=p, cantidad=cantidad, total=total, proforma={'producto': p.sku, 'total': total})
         return Response({'order_id': order.id, 'total': total})
