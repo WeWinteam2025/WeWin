@@ -30,14 +30,35 @@
           </nav>
         </div>
       </header>
-      <h1 class="text-2xl font-semibold">Proyectos</h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold">Proyectos</h1>
+        <button id="new-project-btn" class="btn-primary">Nuevo proyecto</button>
+      </div>
       <div id="projects-grid" class="grid md:grid-cols-3 gap-4">
         Cargando tarjetas...
       </div>
       <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Mediciones recientes</h2>
-        <div id="measurements-list">Cargando mediciones...</div>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Mediciones recientes</h2>
+          <button id="open-meas" class="btn-secondary">Ver historial</button>
+        </div>
+        <div id="measurements-summary" class="text-sm text-[color:var(--text-secondary)] mt-2">Cargando…</div>
       </section>
+
+      <!-- Modal mediciones -->
+      <div id="meas-modal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div class="flex justify-between items-center p-4 border-b">
+              <h3 class="text-lg font-semibold">Mediciones recientes</h3>
+              <button id="close-meas" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div class="p-4 overflow-y-auto max-h-[60vh]">
+              <div id="measurements-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
@@ -112,16 +133,21 @@
   }
   async function loadMeasurements() {
     const target = document.getElementById('measurements-list');
+    const summary = document.getElementById('measurements-summary');
     try {
       const res = await fetch(`${getAPI()}/api/measurements/`);
       if (!res.ok) {
-        if (res.status === 401) { target.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
-        target.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>'; return;
+        if (res.status === 401) { summary.innerHTML = 'Inicia sesión para ver mediciones.'; return; }
+        summary.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>'; return;
       }
       let data = await res.json();
       if (!Array.isArray(data) && data?.value) data = data.value;
       if (!Array.isArray(data)) data = [];
-      if (data.length === 0) { target.innerHTML = 'Sin mediciones.'; return; }
+      if (data.length === 0) { summary.innerHTML = 'Sin mediciones.'; return; }
+      // resumen
+      const total = data.slice(0, 12).reduce((a,m)=> a + Number(m.kwh_gen||0), 0);
+      const avg = Math.round(total / Math.max(1, Math.min(12, data.length)));
+      summary.innerHTML = `${data.length} registros • Promedio kWh gen/mes: ${avg}`;
       target.innerHTML = `
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -134,9 +160,20 @@
           </table>
         </div>`;
     } catch (e) {
-      target.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>';
+      summary.innerHTML = '<div class="text-red-600">Error cargando mediciones.</div>';
     }
   }
+  // modal handlers
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const open = document.getElementById('open-meas');
+    const close = document.getElementById('close-meas');
+    const modal = document.getElementById('meas-modal');
+    if (open) open.addEventListener('click', ()=> modal.classList.remove('hidden'));
+    if (close) close.addEventListener('click', ()=> modal.classList.add('hidden'));
+    modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.add('hidden'); });
+    const newBtn = document.getElementById('new-project-btn');
+    if (newBtn) newBtn.addEventListener('click', ()=> alert('Crear nuevo proyecto: próximamente (se abrirá modal con mapa e imagen WebP)'));
+  });
   loadProjects();
   loadMeasurements();
 </script>
