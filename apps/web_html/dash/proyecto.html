@@ -295,8 +295,7 @@
                       new Chart(ictx, { type:'line', data:{ labels: labels, datasets:[
                         { label:'Ingresos acumulados (COP)', data: cumul, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,0.15)', fill:true, tension:0.3 },
                         { label:'Inversión (USD)', data: labels.map(function(){ return capexUsd; }), borderColor:'#ef4444', fill:false, tension:0.3 }
-                      ]}, options:{ plugins:{ legend:{ display:true }}, scales:{ y:{ beginAtZero:true, ticks:{ callback:function(v){ return '$'+v; }}}}}
-                      );
+                      ]}, options:{ plugins:{ legend:{ display:true }}, scales:{ y:{ beginAtZero:true, ticks:{ callback:function(v){ return '$'+v; }}} } });
                     }
                   } catch(e){}
                   })
