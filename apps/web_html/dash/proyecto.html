@@ -162,15 +162,13 @@
               document.getElementById('proj').innerHTML = 
                 '<div class="card">' +
                 (function(){
-                  var img = (p.image_src || p.image_url || '');
-                  if (!img || img.indexOf('data:')===0){
-                    var fall = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                    if (p.slug==='bogota-norte') fall = 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                    if (p.slug==='medellin-sur') fall = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                    if (p.slug==='comunidad-energetica') fall = 'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                    img = fall;
-                  }
-                  if (img && img.indexOf('data:')!==0) img = img + '?ts=' + new Date().getTime();
+                  // Forzar imagen solar verificable por slug/tipo
+                  var fall = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
+                  if (p.slug==='bogota-norte') fall = 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp';
+                  if (p.slug==='medellin-sur') fall = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
+                  if (p.slug==='comunidad-energetica' || p.tipo==='CE') fall = 'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp';
+                  if (p.tipo==='IND') fall = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp';
+                  var img = fall + '?ts=' + new Date().getTime();
                   return '<img src="'+img+'" class="w-full h-56 object-cover rounded mb-4"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +

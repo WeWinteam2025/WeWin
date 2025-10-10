@@ -132,9 +132,8 @@
         return m['bogota-norte'];
       }
       target.innerHTML = data.map(p => {
-        var baseImg = (p.image_src || p.image_url || '');
-        var finalImg = baseImg ? baseImg : solarFallback(p);
-        if (!finalImg || finalImg.indexOf('data:')===0) { finalImg = solarFallback(p); }
+        // Usar siempre imágenes solares verificadas hasta actualizar BD
+        var finalImg = solarFallback(p);
         return `
         <a class="card block" href="/dash/proyecto.html?slug=${p.slug || ''}&v=${ts}">
           ${ finalImg ? `<img src="${finalImg}${finalImg.startsWith('data:')?'':'?ts='+ts}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
