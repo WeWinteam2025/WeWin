@@ -335,20 +335,23 @@ class Command(BaseCommand):
             # Guardar en terms de un contrato dummy o metadata vía Wallet/Investment? Usamos Investment como proxy
             Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': capex, 'expected_irr': 12})
 
-        # Asignar imágenes únicas WebP si force_images está activo
+        # Asignar imágenes únicas WebP si force_images está activo (determinístico por slug)
         if force_images:
             projects = list(Project.objects.all().order_by('id'))
+            fixed = {
+                'bogota-norte': curated_webp[1],
+                'medellin-sur': curated_webp[0],
+                'comunidad-energetica': curated_webp[3],
+                'zona-industrial': curated_webp[2],
+                'residencial-12': curated_webp[4] if len(curated_webp) > 4 else curated_webp[0],
+            }
             for i, proj in enumerate(projects):
-                # Asignación determinística por slug/tipo para evitar repeticiones
-                img = curated_webp[i % len(curated_webp)]
-                if proj.slug == 'bogota-norte':
-                    img = curated_webp[1]
-                elif proj.slug == 'medellin-sur':
-                    img = curated_webp[0]
-                elif proj.slug == 'comunidad-energetica':
-                    img = curated_webp[3]
-                elif proj.ubicacion.lower().startswith('zona industrial'):
-                    img = curated_webp[2]
+                slug = (proj.slug or proj.ubicacion or '').strip().lower().replace(' ', '-')
+                img = fixed.get(slug)
+                if not img:
+                    # hash simple para distribuir imágenes sin colisiones visibles
+                    h = sum(ord(c) for c in slug) if slug else i
+                    img = curated_webp[h % len(curated_webp)]
                 proj.image_url = img
                 proj.image_data = None  # preferimos URL WebP estable
                 proj.save()

@@ -162,15 +162,30 @@
               document.getElementById('proj').innerHTML = 
                 '<div class="card">' +
                 (function(){
-                  // Forzar imagen solar verificable por slug/tipo
-                  var panelsA = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                  var panelsB = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp';
-                  var fall = panelsA;
-                  if (p.slug==='bogota-norte') fall = panelsA;
-                  if (p.slug==='medellin-sur') fall = panelsB;
-                  if (p.slug==='comunidad-energetica' || p.tipo==='CE') fall = panelsA;
-                  if (p.tipo==='IND') fall = panelsB;
-                  var img = fall + '?ts=' + new Date().getTime();
+                  // Forzar imagen solar verificable única por slug
+                  var curated = [
+                    'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                    'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                    'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                    'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                    'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                    'https://images.unsplash.com/photo-1497449493050-aad1e7cad165?q=80&w=1600&auto=format&fit=crop&fm=webp'
+                  ];
+                  var fixed = {
+                    'bogota-norte': curated[0],
+                    'medellin-sur': curated[1],
+                    'comunidad-energetica': curated[2],
+                    'zona-industrial': curated[3],
+                    'residencial-12': curated[4]
+                  };
+                  var base;
+                  if (p && p.slug && fixed[p.slug]) { base = fixed[p.slug]; }
+                  else {
+                    var slug = (p && p.slug) ? String(p.slug) : (p && p.ubicacion ? String(p.ubicacion) : 'x');
+                    var h = 0; for (var i=0;i<slug.length;i++){ h = ((h<<5)-h) + slug.charCodeAt(i); h|=0; }
+                    base = curated[Math.abs(h) % curated.length];
+                  }
+                  var img = base + '?ts=' + new Date().getTime();
                   return '<img src="'+img+'" class="w-full h-56 object-cover rounded mb-4"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
