@@ -142,10 +142,9 @@
             document.getElementById('proj-measurements').innerHTML = 'No hay proyecto.';
             return;
           }
-          var token = localStorage.getItem('access');
-          var headers = token ? { Authorization: 'Bearer ' + token } : {};
+          // Sin headers de autenticación para mediciones públicas
           console.log('Fetching measurements for proyecto:', pid, 'API:', getAPI() + '/api/measurements/?proyecto=' + pid);
-          fetch(getAPI() + '/api/measurements/?proyecto=' + pid, { headers: headers })
+          fetch(getAPI() + '/api/measurements/?proyecto=' + pid)
             .then(function(res){
               console.log('Measurements response status:', res.status);
               if (!res.ok){

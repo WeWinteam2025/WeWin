@@ -42,10 +42,13 @@ class Command(BaseCommand):
 
         # Projects
         # Imágenes: priorizamos techos (viviendas/empresas) con paneles solares
-        # Usamos Unsplash Source para asegurar temática correcta
-        residential_img = 'https://source.unsplash.com/1200x675/?house,rooftop,solar,panels'
-        commercial_img = 'https://source.unsplash.com/1200x675/?building,roof,solar,panels'
-        utility_img = 'https://source.unsplash.com/1200x675/?industrial,rooftop,solar,panels'
+        # URLs estáticas de imágenes de paneles solares por tipo
+        solar_images = {
+            'residential': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Casa con paneles
+            'commercial': 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1200&auto=format&fit=crop',   # Edificio comercial con paneles
+            'industrial': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Instalación industrial
+            'community': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop'   # Comunidad energética
+        }
 
         def image_for(tipo:str, kw:float) -> str:
             try:
@@ -53,10 +56,13 @@ class Command(BaseCommand):
             except Exception:
                 kw = 0
             if tipo == 'RESID' or kw <= 30:
-                return residential_img
-            if kw <= 220:
-                return commercial_img
-            return utility_img
+                return solar_images['residential']
+            elif tipo == 'CE' or 'COMUNIDAD' in str(tipo).upper():
+                return solar_images['community']
+            elif kw <= 220:
+                return solar_images['commercial']
+            else:
+                return solar_images['industrial']
 
 
         # Ensure three canonical projects exist with images; avoid duplicates
