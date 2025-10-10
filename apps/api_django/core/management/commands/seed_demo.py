@@ -52,6 +52,7 @@ class Command(BaseCommand):
         }
 
         curated_webp = [
+            # techos solares residenciales/comerciales/industriales - WebP
             'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
             'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp',
             'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp',
@@ -338,7 +339,18 @@ class Command(BaseCommand):
         if force_images:
             projects = list(Project.objects.all().order_by('id'))
             for i, proj in enumerate(projects):
-                proj.image_url = curated_webp[i % len(curated_webp)]
+                # Asignación determinística por slug/tipo para evitar repeticiones
+                img = curated_webp[i % len(curated_webp)]
+                if proj.slug == 'bogota-norte':
+                    img = curated_webp[1]
+                elif proj.slug == 'medellin-sur':
+                    img = curated_webp[0]
+                elif proj.slug == 'comunidad-energetica':
+                    img = curated_webp[3]
+                elif proj.ubicacion.lower().startswith('zona industrial'):
+                    img = curated_webp[2]
+                proj.image_url = img
+                proj.image_data = None  # preferimos URL WebP estable
                 proj.save()
 
         # ===== 5 Comunidades Energéticas en diferentes ciudades =====
