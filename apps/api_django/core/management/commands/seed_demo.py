@@ -52,10 +52,15 @@ class Command(BaseCommand):
         }
 
         curated_webp = [
-            # Solo 3 imágenes 100% solares para evitar cualquier mezcla accidental
-            'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            # Lista ampliada de imágenes solares (sin eólica)
+            'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp',
             'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp',
-            'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp'
+            'https://images.unsplash.com/photo-1552806294-8366c99736c8?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1545205676-9bdb8b066dde?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1600&auto=format&fit=crop&fm=webp'
         ]
         force_images = os.environ.get('SEED_FORCE_IMAGES', 'false').lower() == 'true'
 
