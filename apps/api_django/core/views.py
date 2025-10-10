@@ -76,10 +76,7 @@ class MeasurementViewSet(viewsets.ModelViewSet):
     queryset = Measurement.objects.all()
     serializer_class = MeasurementSerializer
     # Lectura pública; escritura autenticada
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [ReadPublicPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()
