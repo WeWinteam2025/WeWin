@@ -119,15 +119,31 @@
         return;
       }
       const ts = Date.now();
-      target.innerHTML = data.map(p => `
+      function solarFallback(p){
+        var m = {
+          'bogota-norte':'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp',
+          'medellin-sur':'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
+          'comunidad-energetica':'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp',
+          'zona-industrial':'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp'
+        };
+        if (p && p.slug && m[p.slug]) return m[p.slug];
+        if (p && (p.tipo==='CE')) return m['comunidad-energetica'];
+        if (p && (p.tipo==='IND')) return m['zona-industrial'];
+        return m['bogota-norte'];
+      }
+      target.innerHTML = data.map(p => {
+        var baseImg = (p.image_src || p.image_url || '');
+        var finalImg = baseImg ? baseImg : solarFallback(p);
+        if (!finalImg || finalImg.indexOf('data:')===0) { finalImg = solarFallback(p); }
+        return `
         <a class="card block" href="/dash/proyecto.html?slug=${p.slug || ''}&v=${ts}">
-          ${ (p.image_src || p.image_url) ? `<img src="${(p.image_src || p.image_url)}${(p.image_src||p.image_url).startsWith('data:')?'':'?ts='+Date.now()}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
+          ${ finalImg ? `<img src="${finalImg}${finalImg.startsWith('data:')?'':'?ts='+ts}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
           <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo}</div>
           <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
           <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>
           <div class="text-sm">Estado: ${p.estado}</div>
-        </a>
-      `).join('');
+        </a>`;
+      }).join('');
     } catch (e) {
       target.innerHTML = '<div class="text-red-600">Error cargando proyectos.</div>';
     }
