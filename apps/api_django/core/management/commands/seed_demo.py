@@ -7,6 +7,8 @@ from catalog.models import Product, B2BOrder
 from epc.models import WorkOrder
 from governance.models import CommunityEnergy, Voting
 from consulting.models import ConsultingService, ConsultingPackage, ConsultingContract
+from datetime import datetime, timedelta
+import random
 
 
 class Command(BaseCommand):
@@ -56,10 +58,11 @@ class Command(BaseCommand):
                 return commercial_img
             return utility_img
 
+
         # Ensure three canonical projects exist with images; avoid duplicates
         p1 = Project.objects.filter(ubicacion='Zona Industrial').order_by('id').first()
         if not p1:
-            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=image_for('IND', 100), slug='zona-industrial')
+            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=image_for('IND', 100), slug='zona-industrial', descripcion='Instalación industrial de 100 kW en zona norte de Bogotá. Proyecto piloto para demostrar viabilidad de energía solar en sector manufacturero.')
         else:
             updated = False
             desired = image_for('IND', p1.potencia_kw)
@@ -69,12 +72,15 @@ class Command(BaseCommand):
             if p1.estado != 'ACTIVE':
                 p1.estado = 'ACTIVE'
                 updated = True
+            if not p1.descripcion:
+                p1.descripcion = 'Instalación industrial de 100 kW en zona norte de Bogotá. Proyecto piloto para demostrar viabilidad de energía solar en sector manufacturero.'
+                updated = True
             if updated:
                 p1.save()
 
         p2 = Project.objects.filter(ubicacion='Comunidad Energetica').order_by('id').first()
         if not p2:
-            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=image_for('CE', 500), slug='comunidad-energetica')
+            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=image_for('CE', 500), slug='comunidad-energetica', descripcion='Comunidad energética de 500 kW que agrupa múltiples techos residenciales y comerciales. Proyecto comunitario que demuestra el potencial de la generación distribuida.')
         else:
             updated = False
             desired = image_for('CE', p2.potencia_kw)
@@ -84,16 +90,22 @@ class Command(BaseCommand):
             if p2.estado != 'ACTIVE':
                 p2.estado = 'ACTIVE'
                 updated = True
+            if not p2.descripcion:
+                p2.descripcion = 'Comunidad energética de 500 kW que agrupa múltiples techos residenciales y comerciales. Proyecto comunitario que demuestra el potencial de la generación distribuida.'
+                updated = True
             if updated:
                 p2.save()
 
         p3 = Project.objects.filter(ubicacion='Residencial 12').order_by('id').first()
         if not p3:
-            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12')
+            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12', descripcion='Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.')
         else:
             desired = image_for('RESID', p3.potencia_kw)
             if (not p3.image_url) or ('source.unsplash.com' not in p3.image_url):
                 p3.image_url = desired
+                p3.save()
+            if not p3.descripcion:
+                p3.descripcion = 'Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.'
                 p3.save()
         # 18+ meses de mediciones para proyectos base
         def add_measure_series(proj, start_year=2024, start_month=4, months=18, base_kw=100):
@@ -121,6 +133,7 @@ class Command(BaseCommand):
 
         add_measure_series(p1, base_kw=100)
         add_measure_series(p2, base_kw=500)
+        add_measure_series(p3, base_kw=12)
 
         # Wallets
         for a in actors.values():
