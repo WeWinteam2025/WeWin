@@ -35,17 +35,19 @@
           (function(){
             function renderAuth(slot){
               if (!slot) return;
-              const token = localStorage.getItem('access');
+              var token = localStorage.getItem('access');
               if (!token){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; return; }
-              fetch((window.API_BASE|| (location.hostname.includes('wewin.space')?'https://api.wewin.space':'http://localhost:8001')) + '/api/profiles/?current=1', { headers:{ Authorization:'Bearer '+token }})
-                .then(r=>r.ok?r.json():[]).then(data=>{
-                  var profile = Array.isArray(data)? data[0] : (data?.value? data.value[0] : null);
+              fetch((window.API_BASE|| (location.hostname.indexOf('wewin.space')>=0?'https://api.wewin.space':'http://localhost:8001')) + '/api/profiles/?current=1', { headers:{ Authorization:'Bearer '+token }})
+                .then(function(r){ return r.ok ? r.json() : []; })
+                .then(function(data){
+                  var profile = Array.isArray(data)? data[0] : ((data && data.value) ? data.value[0] : null);
                   var avatar = (profile && profile.avatar_url) ? profile.avatar_url : 'https://www.gravatar.com/avatar/?d=identicon';
                   slot.innerHTML = '<a href="/dash/profile.html" title="Perfil"><img src="'+avatar+'" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"/></a>'+
                     '<button id=\"logout-btn\" style=\"margin-left:8px\" class=\"btn-primary\">Salir</button>';
                   var btn = document.getElementById('logout-btn');
                   if (btn) btn.addEventListener('click', function(){ localStorage.removeItem('access'); localStorage.removeItem('refresh'); location.href='/auth/login.html'; });
-                }).catch(function(){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; });
+                })
+                .catch(function(){ slot.innerHTML = '<a href="/auth/login.html" class="hover:opacity-80">Ingresar</a>'; });
             }
             document.addEventListener('DOMContentLoaded', function(){ renderAuth(document.getElementById('auth-slot')); });
           })();
