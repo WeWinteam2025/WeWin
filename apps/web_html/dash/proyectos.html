@@ -120,16 +120,19 @@
       }
       const ts = Date.now();
       function solarFallback(p){
+        // Solo paneles solares (ids estáticos de Unsplash con fm=webp)
+        var panelsA = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp';
+        var panelsB = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp';
         var m = {
-          'bogota-norte':'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp',
-          'medellin-sur':'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
-          'comunidad-energetica':'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp',
-          'zona-industrial':'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp'
+          'bogota-norte': panelsA,
+          'medellin-sur': panelsB,
+          'comunidad-energetica': panelsA,
+          'zona-industrial': panelsB
         };
         if (p && p.slug && m[p.slug]) return m[p.slug];
-        if (p && (p.tipo==='CE')) return m['comunidad-energetica'];
-        if (p && (p.tipo==='IND')) return m['zona-industrial'];
-        return m['bogota-norte'];
+        if (p && (p.tipo==='CE')) return panelsA;
+        if (p && (p.tipo==='IND')) return panelsB;
+        return panelsA;
       }
       target.innerHTML = data.map(p => {
         // Usar siempre imágenes solares verificadas hasta actualizar BD
