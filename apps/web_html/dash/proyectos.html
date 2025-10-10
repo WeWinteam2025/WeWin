@@ -99,7 +99,7 @@
       }
       target.innerHTML = data.map(p => `
         <a class="card block" href="/dash/proyecto.html?slug=${p.slug || ''}">
-          ${p.image_url ? `<img src="${p.image_url}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
+          ${ (p.image_src || p.image_url) ? `<img src="${(p.image_src || p.image_url)}${(p.image_src||p.image_url).startsWith('data:')?'':'?ts='+Date.now()}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
           <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo}</div>
           <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
           <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>

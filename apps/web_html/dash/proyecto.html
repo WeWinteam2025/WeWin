@@ -155,7 +155,7 @@
               
               document.getElementById('proj').innerHTML = 
                 '<div class="card">' +
-                (p.image_url ? '<img src="' + p.image_url + '" class="w-full h-56 object-cover rounded mb-4"/>' : '') +
+                ((p.image_src || p.image_url) ? '<img src="' + (p.image_src || p.image_url) + ((p.image_src||p.image_url).startsWith('data:')?'':'?ts='+Date.now()) + '" class="w-full h-56 object-cover rounded mb-4"/>' : '') +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
                 '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + '</div>' +

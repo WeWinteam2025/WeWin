@@ -54,6 +54,8 @@ class Project(models.Model):
     ubicacion = models.CharField(max_length=255)
     estado = models.CharField(max_length=64, default='INIT')
     image_url = models.URLField(blank=True, default='')
+    # Imagen embebida en base64 (WebP preferido) para evitar dependencia de archivos
+    image_data = models.TextField(blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)

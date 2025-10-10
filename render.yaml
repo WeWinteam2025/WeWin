@@ -25,6 +25,8 @@ services:
         sync: false
       - key: SEED_DEMO
         value: 'true'
+      - key: SEED_FORCE_IMAGES
+        value: 'true'
       - key: CORS_ALLOW_ALL_ORIGINS
         value: 'false'
       - key: CORS_ALLOWED_ORIGINS

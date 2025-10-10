@@ -17,10 +17,11 @@ class ActorSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     buyer_info = serializers.SerializerMethodField()
     seller_info = serializers.SerializerMethodField()
+    image_src = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = '__all__'  # incluye image_data (writeable)
     
     def get_buyer_info(self, obj):
         """Obtener información del comprador de energía"""
@@ -38,6 +39,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         except:
             pass
         return None
+
+    def get_image_src(self, obj):
+        try:
+            return obj.image_data or obj.image_url or ''
+        except Exception:
+            return ''
     
     def get_seller_info(self, obj):
         """Obtener información del vendedor de energía"""

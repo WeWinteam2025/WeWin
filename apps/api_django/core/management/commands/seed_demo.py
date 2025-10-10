@@ -8,6 +8,7 @@ from epc.models import WorkOrder
 from governance.models import CommunityEnergy, Voting
 from consulting.models import ConsultingService, ConsultingPackage, ConsultingContract
 from datetime import datetime, timedelta
+import os
 import random
 
 
@@ -42,13 +43,29 @@ class Command(BaseCommand):
 
         # Projects
         # Imágenes: priorizamos techos (viviendas/empresas) con paneles solares
-        # URLs estáticas de imágenes reales de paneles solares
+        # URLs estáticas de imágenes reales de paneles solares (usaremos WebP cuando esté disponible)
         solar_images = {
             'residential': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Casa residencial con paneles
             'commercial': 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1200&auto=format&fit=crop',   # Edificio comercial con paneles
             'industrial': 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1200&auto=format&fit=crop',  # Instalación industrial con paneles
             'community': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop'   # Comunidad energética con paneles
         }
+
+        curated_webp = [
+            'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1542889601-23f652bb3d31?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1504270997636-07ddfbd48945?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1552806294-8366c99736c8?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1545205676-9bdb8b066dde?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1509391343786-c6ba5cf65f2f?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1508514177221-188b1cf16b62?q=80&w=1600&auto=format&fit=crop&fm=webp',
+            'https://images.unsplash.com/photo-1497449493050-aad1e7cad165?q=80&w=1600&auto=format&fit=crop&fm=webp',
+        ]
+        force_images = os.environ.get('SEED_FORCE_IMAGES', 'false').lower() == 'true'
 
         def image_for(tipo:str, kw:float) -> str:
             try:
@@ -72,7 +89,7 @@ class Command(BaseCommand):
         else:
             updated = False
             desired = image_for('IND', p1.potencia_kw)
-            if (not p1.image_url) or ('source.unsplash.com' not in p1.image_url):
+            if force_images or (not p1.image_url):
                 p1.image_url = desired
                 updated = True
             if p1.estado != 'ACTIVE':
@@ -90,7 +107,7 @@ class Command(BaseCommand):
         else:
             updated = False
             desired = image_for('CE', p2.potencia_kw)
-            if (not p2.image_url) or ('source.unsplash.com' not in p2.image_url):
+            if force_images or (not p2.image_url):
                 p2.image_url = desired
                 updated = True
             if p2.estado != 'ACTIVE':
@@ -107,7 +124,7 @@ class Command(BaseCommand):
             p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12', descripcion='Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.')
         else:
             desired = image_for('RESID', p3.potencia_kw)
-            if (not p3.image_url) or ('source.unsplash.com' not in p3.image_url):
+            if force_images or (not p3.image_url):
                 p3.image_url = desired
                 p3.save()
             if not p3.descripcion:
@@ -273,13 +290,13 @@ class Command(BaseCommand):
         pdn, created_n = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Bogotá Norte', defaults={'potencia_kw': 250, 'estado': 'ACTIVE', 'image_url': image_for('IND', 250), 'slug': 'bogota-norte', 'lat': 4.75, 'lng': -74.05, 'descripcion': 'Techo industrial con 250 kW para autoconsumo y venta de excedentes.'})
         if not created_n:
             desired = image_for('IND', pdn.potencia_kw)
-            if (not pdn.image_url) or ('source.unsplash.com' not in pdn.image_url):
+            if force_images or (not pdn.image_url):
                 pdn.image_url = desired
                 pdn.save()
         pds, created_s = Project.objects.get_or_create(owner=roof2, tipo='IND', ubicacion='Medellín Sur', defaults={'potencia_kw': 180, 'estado': 'ACTIVE', 'image_url': image_for('IND', 180), 'slug': 'medellin-sur', 'lat': 6.20, 'lng': -75.58, 'descripcion': 'Cubierta comercial de 180 kW orientada a reducción de factura.'})
         if not created_s:
             desired = image_for('IND', pds.potencia_kw)
-            if (not pds.image_url) or ('source.unsplash.com' not in pds.image_url):
+            if force_images or (not pds.image_url):
                 pds.image_url = desired
                 pds.save()
 
@@ -316,6 +333,13 @@ class Command(BaseCommand):
             panels, capex = calc_panels_and_capex(float(proj.potencia_kw))
             # Guardar en terms de un contrato dummy o metadata vía Wallet/Investment? Usamos Investment como proxy
             Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': capex, 'expected_irr': 12})
+
+        # Asignar imágenes únicas WebP si force_images está activo
+        if force_images:
+            projects = list(Project.objects.all().order_by('id'))
+            for i, proj in enumerate(projects):
+                proj.image_url = curated_webp[i % len(curated_webp)]
+                proj.save()
 
         # ===== 5 Comunidades Energéticas en diferentes ciudades =====
         faces = [
