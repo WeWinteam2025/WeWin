@@ -286,20 +286,11 @@
                       '<div class="md:col-span-3"><div class="text-sm text-[color:var(--text-secondary)]">VPN (flujo generado a 10% anual)</div><div class="text-xl font-semibold">' + fmt(npv,'COP') + '</div></div>' +
                       '</div>';
 
-                  // Ingresos acumulados vs inversión
-                  try {
-                    var labels2 = data.slice().sort(function(a,b){ return String(a.periodo).localeCompare(String(b.periodo)); }).map(function(m){ return m.periodo; });
-                    var cumul = [];
-                    var acc = 0;
-                    for (var i=0;i<ingresosMensuales.length;i++){ acc += ingresosMensuales[i]; cumul.push(Math.round(acc)); }
-                    var ictx = document.getElementById('incomeChart');
-                    if (ictx && window.Chart){
-                      new Chart(ictx, { type:'line', data:{ labels: labels2, datasets:[
-                        { label:'Ingresos acumulados (COP)', data: cumul, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,0.15)', fill:true, tension:0.3 },
-                        { label:'Inversión (USD)', data: labels2.map(function(){ return capexUsd; }), borderColor:'#ef4444', fill:false, tension:0.3 }
-                      ]}, options:{ plugins:{ legend:{ display:true }}, scales:{ y:{ beginAtZero:true, ticks:{ callback:function(v){ return '$'+v; }}} } });
-                    }
-                  } catch(e){}
+                  // Ingresos acumulados vs inversión (gráfica temporalmente deshabilitada por compatibilidad)
+                  var ictx = document.getElementById('incomeChart');
+                  if (ictx) {
+                    // no-op
+                  }
                   })
                   .catch(function(){ document.getElementById('econ').innerHTML = '—'; });
               });
