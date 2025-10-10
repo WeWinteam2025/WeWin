@@ -15,9 +15,41 @@ class ActorSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    buyer_info = serializers.SerializerMethodField()
+    seller_info = serializers.SerializerMethodField()
+    
     class Meta:
         model = Project
         fields = '__all__'
+    
+    def get_buyer_info(self, obj):
+        """Obtener información del comprador de energía"""
+        try:
+            contract = obj.contract_set.filter(tipo='PPA').first()
+            if contract and contract.partes.exists():
+                buyer = contract.partes.filter(type='BUYER').first()
+                if buyer:
+                    return {
+                        'username': buyer.user.username if buyer.user else '',
+                        'organization': buyer.organization.name if buyer.organization else '',
+                        'tarifa': contract.tarifa,
+                        'vigencia': contract.vigencia
+                    }
+        except:
+            pass
+        return None
+    
+    def get_seller_info(self, obj):
+        """Obtener información del vendedor de energía"""
+        try:
+            return {
+                'username': obj.owner.user.username if obj.owner and obj.owner.user else '',
+                'organization': obj.owner.organization.name if obj.owner and obj.owner.organization else '',
+                'type': obj.owner.type if obj.owner else ''
+            }
+        except:
+            pass
+        return None
 
 
 class MeasurementSerializer(serializers.ModelSerializer):

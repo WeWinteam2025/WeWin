@@ -42,12 +42,12 @@ class Command(BaseCommand):
 
         # Projects
         # Imágenes: priorizamos techos (viviendas/empresas) con paneles solares
-        # URLs estáticas de imágenes de paneles solares por tipo
+        # URLs estáticas de imágenes reales de paneles solares
         solar_images = {
-            'residential': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Casa con paneles
+            'residential': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Casa residencial con paneles
             'commercial': 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1200&auto=format&fit=crop',   # Edificio comercial con paneles
-            'industrial': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop',  # Instalación industrial
-            'community': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop'   # Comunidad energética
+            'industrial': 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1200&auto=format&fit=crop',  # Instalación industrial con paneles
+            'community': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop'   # Comunidad energética con paneles
         }
 
         def image_for(tipo:str, kw:float) -> str:

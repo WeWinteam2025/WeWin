@@ -54,7 +54,10 @@
       <div id="proj"></div>
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Mediciones</h2>
-        <div id="proj-measurements">Cargando...</div>
+        <div id="proj-measurements">
+          <button id="view-measurements-btn" class="btn-secondary">Ver historial de mediciones</button>
+          <div id="measurements-summary" class="mt-2 text-sm text-[color:var(--text-secondary)]"></div>
+        </div>
       </section>
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Resumen económico</h2>
@@ -64,6 +67,25 @@
         <h2 class="text-lg font-semibold mb-3">Rendimiento histórico</h2>
         <canvas id="perfChart" height="120"></canvas>
       </section>
+    </div>
+
+    <!-- Modal para mediciones -->
+    <div id="measurements-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+          <div class="flex justify-between items-center p-4 border-b">
+            <h3 class="text-lg font-semibold">Historial de Mediciones</h3>
+            <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="p-4 overflow-y-auto max-h-[60vh]">
+            <div id="measurements-table"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <script>
       function getAPI(){ return (window.API_BASE || (location.hostname.indexOf('wewin.space')>=0?'https://api.wewin.space':'http://localhost:8001')); }
@@ -121,6 +143,16 @@
             })
             .then(function(p){
               if (!p) return;
+              // Información de comprador y vendedor
+              var buyerInfo = '';
+              var sellerInfo = '';
+              if (p.buyer_info) {
+                buyerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Comprador de energía</div><div class="text-sm font-medium">' + (p.buyer_info.organization || p.buyer_info.username || 'Empresa') + '</div><div class="text-xs text-[color:var(--text-secondary)]">Tarifa: $' + (p.buyer_info.tarifa || 0) + '/kWh</div></div>';
+              }
+              if (p.seller_info) {
+                sellerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Generador de energía</div><div class="text-sm font-medium">' + (p.seller_info.organization || p.seller_info.username || 'Usuario') + '</div><div class="text-xs text-[color:var(--text-secondary)]">' + (p.seller_info.type || '') + '</div></div>';
+              }
+              
               document.getElementById('proj').innerHTML = 
                 '<div class="card">' +
                 (p.image_url ? '<img src="' + p.image_url + '" class="w-full h-56 object-cover rounded mb-4"/>' : '') +
@@ -128,6 +160,7 @@
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
                 '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + '</div>' +
                 (p.descripcion ? '<div class="text-[color:var(--text-secondary)] text-sm leading-relaxed border-t border-slate-200 pt-4">' + (p.descripcion || '') + '</div>' : '') +
+                buyerInfo + sellerInfo +
                 '</div>';
             })
             .catch(function(e){
@@ -162,14 +195,26 @@
                 document.getElementById('proj-measurements').innerHTML = 'Sin mediciones.';
                 return;
               }
+              // Mostrar resumen en lugar de tabla completa
+              var totalKwh = data.reduce(function(a,m){ return a + Number(m.kwh_gen || 0); }, 0);
+              var avgKwh = totalKwh / data.length;
+              var latest = data[0];
+              document.getElementById('measurements-summary').innerHTML = 
+                '<div class="grid grid-cols-3 gap-4 text-center">' +
+                '<div><div class="text-lg font-semibold">' + data.length + '</div><div class="text-xs">meses</div></div>' +
+                '<div><div class="text-lg font-semibold">' + Math.round(avgKwh) + '</div><div class="text-xs">kWh/mes</div></div>' +
+                '<div><div class="text-lg font-semibold">' + (latest.kwh_gen || 0) + '</div><div class="text-xs">último mes</div></div>' +
+                '</div>';
+
+              // Preparar tabla completa para el modal
               var tableRows = data.map(function(m){
                 return '<tr class="border-t border-slate-200"><td class="py-2">' + (m.periodo || '') + '</td><td>' + (m.kwh_gen || 0) + '</td><td>' + (m.kwh_cons || 0) + '</td><td>' + (m.kwh_exced || 0) + '</td></tr>';
               }).join('');
-              document.getElementById('proj-measurements').innerHTML = 
+              document.getElementById('measurements-table').innerHTML = 
                 '<div class="overflow-x-auto">' +
                 '<table class="w-full text-sm">' +
-                '<thead class="text-left text-[color:var(--text-secondary)]">' +
-                '<tr><th class="py-2">Periodo</th><th class="py-2">kWh gen</th><th class="py-2">kWh cons</th><th class="py-2">Excedente</th></tr>' +
+                '<thead class="text-left text-[color:var(--text-secondary)] bg-gray-50">' +
+                '<tr><th class="py-3 px-2">Periodo</th><th class="py-3 px-2">kWh generados</th><th class="py-3 px-2">kWh consumidos</th><th class="py-3 px-2">Excedente</th></tr>' +
                 '</thead>' +
                 '<tbody>' + tableRows + '</tbody>' +
                 '</table>' +
@@ -243,6 +288,33 @@
             });
         });
       }
+
+      // Modal functionality
+      document.addEventListener('DOMContentLoaded', function(){
+        var modal = document.getElementById('measurements-modal');
+        var openBtn = document.getElementById('view-measurements-btn');
+        var closeBtn = document.getElementById('close-modal');
+        
+        if (openBtn) {
+          openBtn.addEventListener('click', function(){
+            modal.classList.remove('hidden');
+          });
+        }
+        
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(){
+            modal.classList.add('hidden');
+          });
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        modal.addEventListener('click', function(e){
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      });
+
       loadProject();
       loadMeasurements();
     </script>
