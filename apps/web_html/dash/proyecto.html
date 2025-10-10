@@ -144,10 +144,13 @@
           }
           var token = localStorage.getItem('access');
           var headers = token ? { Authorization: 'Bearer ' + token } : {};
+          console.log('Fetching measurements for proyecto:', pid, 'API:', getAPI() + '/api/measurements/?proyecto=' + pid);
           fetch(getAPI() + '/api/measurements/?proyecto=' + pid, { headers: headers })
             .then(function(res){
+              console.log('Measurements response status:', res.status);
               if (!res.ok){
-                document.getElementById('proj-measurements').innerHTML = 'No se pudo cargar.';
+                console.error('Measurements fetch failed:', res.status, res.statusText);
+                document.getElementById('proj-measurements').innerHTML = 'No se pudo cargar (status: ' + res.status + ').';
                 return;
               }
               return res.json();
