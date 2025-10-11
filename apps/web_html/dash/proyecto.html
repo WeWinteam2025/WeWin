@@ -154,7 +154,7 @@
               var sellerInfo = '';
               if (p.buyer_info) {
                 var bavatar = (p.buyer_info.avatar ? '<img src="'+p.buyer_info.avatar+'" class="w-6 h-6 inline-block rounded-full mr-2"/>' : '');
-                buyerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Comprador de energía</div><div class="text-sm font-medium">' + bavatar + (p.buyer_info.organization || p.buyer_info.username || 'Empresa') + '</div><div class="text-xs text-[color:var(--text-secondary)]">Tarifa: $' + (p.buyer_info.tarifa || 0) + '/kWh</div></div>';
+                buyerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Comprador de energía</div><div class="text-sm font-medium">' + bavatar + (p.buyer_info.organization || p.buyer_info.username || 'Empresa') + '</div><div class="text-xs text-[color:var(--text-secondary)]">Tarifa PPA: <strong>$' + (p.buyer_info.tarifa || 0) + '</strong>/kWh</div></div>';
               }
               if (p.seller_info) {
                 var savatar = (p.seller_info.avatar ? '<img src="'+p.seller_info.avatar+'" class="w-6 h-6 inline-block rounded-full mr-2"/>' : '');
@@ -208,7 +208,12 @@
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
-                '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + ' • Precio venta: <strong>$' + (p.precio_cop_kw || 0) + '</strong>/kWh</div>' +
+                (function(){
+                  var precio = Number(p.precio_cop_kw || 750);
+                  var grid = 850; // COP/kWh referencial
+                  var ahorro = Math.max(0, grid - precio);
+                  return '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + ' • Precio venta: <strong>$' + precio + '</strong>/kWh • Ahorro vs red: <strong>$' + ahorro + '</strong>/kWh</div>';
+                })() +
                 (p.descripcion ? '<div class="text-[color:var(--text-secondary)] text-sm leading-relaxed border-t border-slate-200 pt-4">' + (p.descripcion || '') + '</div>' : '') +
                 buyerInfo + sellerInfo +
                 '</div>';
