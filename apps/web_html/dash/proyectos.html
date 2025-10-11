@@ -143,11 +143,16 @@
         return curated[idx];
       }
       target.innerHTML = data.map(p => {
-        // Usar siempre imágenes solares verificadas hasta actualizar BD
+        // Imagen local por slug si existe; fallback a solar verificada
         var finalImg = solarFallback(p);
+        var sep = finalImg.indexOf('?') >= 0 ? '&' : '?';
+        var busted = finalImg + sep + 'ts=' + ts;
+        var slug = (p && p.slug) ? p.slug : '';
+        var localSrc = slug ? ('/img/solar/' + slug + '.webp?v=' + ts) : '';
+        var imgTag = finalImg ? `<img src="${localSrc || busted}" onerror="this.onerror=null;this.src='${busted.replace(/'/g, "\'")}'" alt="${p.ubicacion || ''}" class="w-full h-32 object-cover rounded mb-3"/>` : '';
         return `
-        <a class="card block" href="/dash/proyecto.html?slug=${p.slug || ''}&v=${ts}">
-          ${ finalImg ? `<img src="${finalImg}${finalImg.startsWith('data:')?'':'?ts='+ts}" alt="${p.ubicacion}" class="w-full h-32 object-cover rounded mb-3"/>` : ''}
+        <a class="card block" href="/dash/proyecto.html?slug=${slug}&v=${ts}">
+          ${ imgTag }
           <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo}</div>
           <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
           <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>

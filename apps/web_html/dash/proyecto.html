@@ -179,12 +179,13 @@
                   var base;
                   if (p && p.slug && fixed[p.slug]) { base = fixed[p.slug]; }
                   else {
-                    var slug = (p && p.slug) ? String(p.slug) : (p && p.ubicacion ? String(p.ubicacion) : 'x');
-                    var h = 0; for (var i=0;i<slug.length;i++){ h = ((h<<5)-h) + slug.charCodeAt(i); h|=0; }
+                    var slugx = (p && p.slug) ? String(p.slug) : (p && p.ubicacion ? String(p.ubicacion) : 'x');
+                    var h = 0; for (var i=0;i<slugx.length;i++){ h = ((h<<5)-h) + slugx.charCodeAt(i); h|=0; }
                     base = curated[Math.abs(h) % curated.length];
                   }
                   var img = base + '?ts=' + new Date().getTime();
-                  return '<img src="'+img+'" class="w-full h-56 object-cover rounded mb-4"/>';
+                  var local = (p && p.slug) ? ('/img/solar/' + p.slug + '.webp?v=' + new Date().getTime()) : '';
+                  return '<img src="'+(local||img)+'" onerror="this.onerror=null;this.src=\''+img.replace(/'/g, "\\'")+'\'" class="w-full h-56 object-cover rounded mb-4"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
