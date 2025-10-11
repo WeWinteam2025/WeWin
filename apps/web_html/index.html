@@ -211,15 +211,53 @@
             if (!Array.isArray(data) && data?.results) data = data.results;
             if (!Array.isArray(data)) data = [];
             if (data.length === 0) { slot.innerHTML = '<div class="text-[color:var(--text-secondary)]">Sin proyectos activos.</div>'; return; }
-            slot.innerHTML = data.slice(0,3).map(p => `
-              <a class="card block" href="/dash/proyecto.html?id=${p.id}">
-                ${p.image_url ? `<img src="${p.image_url}" alt="${p.ubicacion}" class="w-full h-40 object-cover rounded mb-3"/>` : ''}
-                <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo || ''}</div>
-                <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
-                <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>
-                <div class="text-sm">Estado: ${p.estado}</div>
-              </a>
-            `).join('');
+            const ts = Date.now();
+            function slugify(s){
+              if (!s) return '';
+              return String(s).toLowerCase()
+                .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+                .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+                .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+            }
+            function solarFallback(p){
+              const curated = [
+                'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1600&auto=format&fit=crop&fm=webp',
+                'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?q=80&w=1600&auto=format&fit=crop&fm=webp'
+              ];
+              const slug = (p && p.slug) ? p.slug : slugify(p && p.ubicacion ? p.ubicacion : '');
+              if (slug==='bogota-norte') return curated[0];
+              if (slug==='medellin-sur') return curated[1];
+              if (slug==='comunidad-energetica') return curated[2];
+              const h = Math.abs((slug||'x').split('').reduce((a,c)=>((a<<5)-a)+c.charCodeAt(0),0));
+              return curated[h % curated.length];
+            }
+            slot.innerHTML = data.slice(0,3).map(p => {
+              const finalImg = solarFallback(p);
+              const sep = finalImg.indexOf('?')>=0 ? '&' : '?';
+              const busted = finalImg + sep + 'ts=' + ts;
+              const slug = (p && p.slug) ? p.slug : slugify(p && p.ubicacion ? p.ubicacion : '');
+              const cands = [];
+              if (slug){
+                if (p && p.id) cands.push('/img/solar/' + slug + '-' + p.id + '.webp?v=' + ts);
+                cands.push('/img/solar/' + slug + '-b.webp?v=' + ts);
+                cands.push('/img/solar/' + slug + '.webp?v=' + ts);
+              }
+              cands.push(busted);
+              const listStr = cands.map(s=>s.replace(/"/g,'&quot;')).join('|');
+              const first = cands[0] || busted;
+              const imgTag = `<img src="${first}" data-i="0" onerror="(function(img){var L='${listStr}'.split('|');var i=(parseInt(img.dataset.i||'0',10)+1);if(i<L.length){img.dataset.i=i;img.src=L[i];}})(this)" alt="${p.ubicacion||''}" class="w-full h-40 object-cover rounded mb-3"/>`;
+              const href = `/dash/proyecto.html?${p && p.slug ? ('slug='+slug) : ('id='+ (p && p.id ? p.id : ''))}&v=${ts}`;
+              return `
+                <a class="card block" href="${href}">
+                  ${imgTag}
+                  <div class="text-sm text-[color:var(--text-secondary)]">${p.tipo || ''}</div>
+                  <div class="text-xl font-semibold mb-1">${p.ubicacion || 'Proyecto'}</div>
+                  <div class="text-sm">Potencia: <strong>${p.potencia_kw} kW</strong></div>
+                  <div class="text-sm">Estado: ${p.estado}</div>
+                </a>
+              `;
+            }).join('');
           } catch(e){
             slot.innerHTML = '<div class="text-red-600">Error cargando proyectos.</div>';
           }
