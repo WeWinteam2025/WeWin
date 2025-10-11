@@ -30,11 +30,18 @@ class ProjectSerializer(serializers.ModelSerializer):
             if contract and contract.partes.exists():
                 buyer = contract.partes.filter(type='BUYER').first()
                 if buyer:
+                    avatar = ''
+                    try:
+                        if getattr(buyer, 'user', None) and getattr(buyer.user, 'profile', None):
+                            avatar = buyer.user.profile.avatar_url or ''
+                    except Exception:
+                        avatar = ''
                     return {
                         'username': buyer.user.username if buyer.user else '',
                         'organization': buyer.organization.name if buyer.organization else '',
                         'tarifa': contract.tarifa,
-                        'vigencia': contract.vigencia
+                        'vigencia': contract.vigencia,
+                        'avatar': avatar
                     }
         except:
             pass
@@ -49,10 +56,17 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_seller_info(self, obj):
         """Obtener información del vendedor de energía"""
         try:
+            avatar = ''
+            try:
+                if obj.owner and getattr(obj.owner, 'user', None) and getattr(obj.owner.user, 'profile', None):
+                    avatar = obj.owner.user.profile.avatar_url or ''
+            except Exception:
+                avatar = ''
             return {
                 'username': obj.owner.user.username if obj.owner and obj.owner.user else '',
                 'organization': obj.owner.organization.name if obj.owner and obj.owner.organization else '',
-                'type': obj.owner.type if obj.owner else ''
+                'type': obj.owner.type if obj.owner else '',
+                'avatar': avatar
             }
         except:
             pass

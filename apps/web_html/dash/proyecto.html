@@ -153,10 +153,12 @@
               var buyerInfo = '';
               var sellerInfo = '';
               if (p.buyer_info) {
-                buyerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Comprador de energía</div><div class="text-sm font-medium">' + (p.buyer_info.organization || p.buyer_info.username || 'Empresa') + '</div><div class="text-xs text-[color:var(--text-secondary)]">Tarifa: $' + (p.buyer_info.tarifa || 0) + '/kWh</div></div>';
+                var bavatar = (p.buyer_info.avatar ? '<img src="'+p.buyer_info.avatar+'" class="w-6 h-6 inline-block rounded-full mr-2"/>' : '');
+                buyerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Comprador de energía</div><div class="text-sm font-medium">' + bavatar + (p.buyer_info.organization || p.buyer_info.username || 'Empresa') + '</div><div class="text-xs text-[color:var(--text-secondary)]">Tarifa: $' + (p.buyer_info.tarifa || 0) + '/kWh</div></div>';
               }
               if (p.seller_info) {
-                sellerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Generador de energía</div><div class="text-sm font-medium">' + (p.seller_info.organization || p.seller_info.username || 'Usuario') + '</div><div class="text-xs text-[color:var(--text-secondary)]">' + (p.seller_info.type || '') + '</div></div>';
+                var savatar = (p.seller_info.avatar ? '<img src="'+p.seller_info.avatar+'" class="w-6 h-6 inline-block rounded-full mr-2"/>' : '');
+                sellerInfo = '<div class="border-t border-slate-200 pt-3 mt-3"><div class="text-xs text-[color:var(--text-secondary)] mb-1">Generador de energía</div><div class="text-sm font-medium">' + savatar + (p.seller_info.organization || p.seller_info.username || 'Usuario') + '</div><div class="text-xs text-[color:var(--text-secondary)]">' + (p.seller_info.type || '') + '</div></div>';
               }
               
               document.getElementById('proj').innerHTML = 
@@ -206,7 +208,7 @@
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
-                '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + '</div>' +
+                '<div class="text-sm mb-4">Potencia: <strong>' + (p.potencia_kw || 0) + ' kW</strong> • Estado: ' + (p.estado || '') + ' • Precio venta: <strong>$' + (p.precio_cop_kw || 0) + '</strong>/kWh</div>' +
                 (p.descripcion ? '<div class="text-[color:var(--text-secondary)] text-sm leading-relaxed border-t border-slate-200 pt-4">' + (p.descripcion || '') + '</div>' : '') +
                 buyerInfo + sellerInfo +
                 '</div>';
