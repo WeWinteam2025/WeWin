@@ -8,6 +8,8 @@
     <script src="/config.js?v=1735248000"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body class="min-h-screen">
     <div class="mx-auto max-w-6xl px-6 py-8 space-y-6">
@@ -65,9 +67,16 @@
         <h2 class="text-lg font-semibold mb-3">Resumen económico</h2>
         <div id="econ">Cargando...</div>
       </section>
-      <section class="card">
-        <h2 class="text-lg font-semibold mb-3">Ingresos acumulados vs inversión</h2>
-        <canvas id="incomeChart" height="120"></canvas>
+      <section class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+          <h2 class="text-lg font-semibold mb-3">Ingresos acumulados vs inversión</h2>
+          <canvas id="incomeChart" height="120"></canvas>
+        </div>
+        <div class="card">
+          <h2 class="text-lg font-semibold mb-3">Ubicación del proyecto</h2>
+          <div id="projectMap" style="height:360px;border-radius:12px;"></div>
+          <div id="projectCoords" class="text-xs text-[color:var(--text-secondary)] mt-2"></div>
+        </div>
       </section>
       <section class="card">
         <h2 class="text-lg font-semibold mb-3">Rendimiento histórico</h2>
@@ -204,7 +213,7 @@
                   cands.push(img);
                   var listStr = cands.map(function(s){ return s.replace(/"/g,'&quot;'); }).join('|');
                   var first = cands[0] || img;
-                  return '<img src="'+first+'" data-i="0" onerror="(function(img){var L=\''+listStr+'\'.split('|');var i=(parseInt(img.dataset.i||\'0\',10)+1);if(i<L.length){img.dataset.i=i;img.src=L[i];}})(this)" class="w-full h-56 object-cover rounded mb-4"/>';
+                  return '<img src="'+first+'" data-i="0" onerror="(function(img){var L=\''+listStr+'\'.split('|');var i=(parseInt(img.dataset.i||\'0\',10)+1);if(i<L.length){img.dataset.i=i;img.src=L[i];}})(this)" class="w-full h-56 object-cover rounded mb-4" alt="Imagen del proyecto"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
@@ -230,6 +239,20 @@
             document.getElementById('proj-measurements').innerHTML = 'No hay proyecto.';
             return;
           }
+          // Cargar detalles de proyecto para el mapa
+          fetch(getAPI() + '/api/projects/' + pid + '/')
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(pr){
+              if (!pr) return;
+              var lat = Number(pr.lat), lng = Number(pr.lng);
+              if (!isNaN(lat) && !isNaN(lng)){
+                var map = L.map('projectMap', { attributionControl: false }).setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+                L.marker([lat, lng]).addTo(map).bindPopup((pr.ubicacion||'Proyecto'));
+                var coord = document.getElementById('projectCoords');
+                if (coord) coord.innerText = 'Coordenadas: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+              }
+            });
           // Sin headers de autenticación para mediciones públicas
           console.log('Fetching measurements for proyecto:', pid, 'API:', getAPI() + '/api/measurements/?proyecto=' + pid);
           fetch(getAPI() + '/api/measurements/?proyecto=' + pid)
