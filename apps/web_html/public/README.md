@@ -11,6 +11,16 @@ Ejemplos de `slug` utilizados:
 - `zona-industrial`
 - `residencial-12`
 
+Conversión automática desde JPG/PNG
+- Coloca tus imágenes fuente en `apps/web_html/public/img_src/` con nombres tipo `bogota-norte.jpg`, `medellin-sur.png`, etc.
+- Ejecuta desde la raíz del repo:
+
+```bash
+cd "Reto 2/apps/web_html"
+npm i --no-audit --no-fund
+npm run img:convert
+```
+
 Notas:
 - Formato recomendado: WebP, ancho 1600px aprox.
 - El frontend intentará cargar `/img/solar/{slug}.webp` primero; si no existe, usa un fallback de paneles solares.
