@@ -192,8 +192,17 @@
                       .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
                   }
                   var localSlug = p && p.slug ? p.slug : slugify(p && p.ubicacion ? p.ubicacion : '');
-                  var local = localSlug ? ('/img/solar/' + localSlug + '.webp?v=' + new Date().getTime()) : '';
-                  return '<img src="'+(local||img)+'" onerror="this.onerror=null;this.src=\''+img.replace(/'/g, "\\'")+'\'" class="w-full h-56 object-cover rounded mb-4"/>';
+                  var ts = new Date().getTime();
+                  var cands = [];
+                  if (localSlug){
+                    if (p && p.id) cands.push('/img/solar/' + localSlug + '-' + p.id + '.webp?v=' + ts);
+                    cands.push('/img/solar/' + localSlug + '-b.webp?v=' + ts);
+                    cands.push('/img/solar/' + localSlug + '.webp?v=' + ts);
+                  }
+                  cands.push(img);
+                  var listStr = cands.map(function(s){ return s.replace(/"/g,'&quot;'); }).join('|');
+                  var first = cands[0] || img;
+                  return '<img src="'+first+'" data-i="0" onerror="(function(img){var L=\''+listStr+'\'.split('|');var i=(parseInt(img.dataset.i||\'0\',10)+1);if(i<L.length){img.dataset.i=i;img.src=L[i];}})(this)" class="w-full h-56 object-cover rounded mb-4"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
                 '<h1 class="text-2xl font-semibold mb-2">' + (p.ubicacion || 'Proyecto') + '</h1>' +
