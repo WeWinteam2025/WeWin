@@ -184,7 +184,15 @@
                     base = curated[Math.abs(h) % curated.length];
                   }
                   var img = base + '?ts=' + new Date().getTime();
-                  var local = (p && p.slug) ? ('/img/solar/' + p.slug + '.webp?v=' + new Date().getTime()) : '';
+                  function slugify(s){
+                    if (!s) return '';
+                    return String(s).toLowerCase()
+                      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+                      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+                      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+                  }
+                  var localSlug = p && p.slug ? p.slug : slugify(p && p.ubicacion ? p.ubicacion : '');
+                  var local = localSlug ? ('/img/solar/' + localSlug + '.webp?v=' + new Date().getTime()) : '';
                   return '<img src="'+(local||img)+'" onerror="this.onerror=null;this.src=\''+img.replace(/'/g, "\\'")+'\'" class="w-full h-56 object-cover rounded mb-4"/>';
                 })() +
                 '<div class="text-sm text-[color:var(--text-secondary)] mb-2">' + (p.tipo || '') + '</div>' +
