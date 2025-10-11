@@ -77,7 +77,7 @@ class Command(BaseCommand):
         # Ensure three canonical projects exist with images; avoid duplicates
         p1 = Project.objects.filter(ubicacion='Zona Industrial').order_by('id').first()
         if not p1:
-            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=image_for('IND', 100), slug='zona-industrial', descripcion='Instalación industrial de 100 kW en zona norte de Bogotá. Proyecto piloto para demostrar viabilidad de energía solar en sector manufacturero.')
+            p1 = Project.objects.create(owner=actors['ROOF_OWNER'], tipo='IND', potencia_kw=100, ubicacion='Zona Industrial', estado='ACTIVE', image_url=image_for('IND', 100), slug='zona-industrial', lat=4.70, lng=-74.10, descripcion='Instalación industrial de 100 kW en zona norte de Bogotá. Proyecto piloto para demostrar viabilidad de energía solar en sector manufacturero.')
         else:
             updated = False
             desired = image_for('IND', p1.potencia_kw)
@@ -90,12 +90,15 @@ class Command(BaseCommand):
             if not p1.descripcion:
                 p1.descripcion = 'Instalación industrial de 100 kW en zona norte de Bogotá. Proyecto piloto para demostrar viabilidad de energía solar en sector manufacturero.'
                 updated = True
+            # Completar coordenadas en Colombia si faltan
+            if not p1.lat or not p1.lng:
+                p1.lat = 4.70; p1.lng = -74.10; updated = True
             if updated:
                 p1.save()
 
         p2 = Project.objects.filter(ubicacion='Comunidad Energetica').order_by('id').first()
         if not p2:
-            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=image_for('CE', 500), slug='comunidad-energetica', descripcion='Comunidad energética de 500 kW que agrupa múltiples techos residenciales y comerciales. Proyecto comunitario que demuestra el potencial de la generación distribuida.')
+            p2 = Project.objects.create(owner=actors['COMMUNITY'], tipo='CE', potencia_kw=500, ubicacion='Comunidad Energetica', estado='ACTIVE', image_url=image_for('CE', 500), slug='comunidad-energetica', lat=6.24, lng=-75.57, descripcion='Comunidad energética de 500 kW que agrupa múltiples techos residenciales y comerciales. Proyecto comunitario que demuestra el potencial de la generación distribuida.')
         else:
             updated = False
             desired = image_for('CE', p2.potencia_kw)
@@ -108,17 +111,21 @@ class Command(BaseCommand):
             if not p2.descripcion:
                 p2.descripcion = 'Comunidad energética de 500 kW que agrupa múltiples techos residenciales y comerciales. Proyecto comunitario que demuestra el potencial de la generación distribuida.'
                 updated = True
+            if not p2.lat or not p2.lng:
+                p2.lat = 6.24; p2.lng = -75.57; updated = True
             if updated:
                 p2.save()
 
         p3 = Project.objects.filter(ubicacion='Residencial 12').order_by('id').first()
         if not p3:
-            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12', descripcion='Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.')
+            p3 = Project.objects.create(owner=actors['INVESTOR'], tipo='RESID', potencia_kw=12, ubicacion='Residencial 12', estado='PLANNING', image_url=image_for('RESID', 12), slug='residencial-12', lat=4.74, lng=-74.09, descripcion='Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.')
         else:
             desired = image_for('RESID', p3.potencia_kw)
             if force_images or (not p3.image_url):
                 p3.image_url = desired
                 p3.save()
+            if not p3.lat or not p3.lng:
+                p3.lat = 4.74; p3.lng = -74.09; p3.save()
             if not p3.descripcion:
                 p3.descripcion = 'Instalación residencial de 12 kW en vivienda unifamiliar. Proyecto en fase de planificación que incluye sistema de monitoreo y medición neta.'
                 p3.save()
