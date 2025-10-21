@@ -334,29 +334,17 @@
                   .then(function(me){
                     var username = me && me.username ? me.username : '';
                     if (username){
-                      return fetch(API + '/api/projects/?owner_user=' + encodeURIComponent(username) + '&limit=10')
-                        .then(function(mineR){ return safeJson(mineR); })
-                        .then(function(data){
-                          if (!Array.isArray(data) && data && data.results) data = data.results; 
-                          if (!Array.isArray(data)) data = [];
-                          return data;
-                        });
+                      return fetch(API + '/api/finance/investments/portfolio_user', { headers:{ Authorization:'Bearer '+token }})
+                        .then(function(r){ return r.ok ? r.json() : { projects: [], aggregate:{ months:[], user_income_12m_cop:[] } }; })
+                        .then(function(port){ return port; });
                     }
-                    return [];
+                    return { projects: [], aggregate:{ months:[], user_income_12m_cop:[] } };
                   })
-                  .then(function(data){
-                    mine = data;
-                    if (mine.length === 0) {
-                      return fetch(API + '/api/projects/?only_active=1&limit=50')
-                        .then(function(pr){ return safeJson(pr); })
-                        .then(function(pj){
-                          if (!Array.isArray(pj) && pj && pj.results) pj = pj.results; 
-                          if (!Array.isArray(pj)) pj = [];
-                          mine = pj.slice(0,2);
-                        });
-                    }
-                  })
-                  .then(function(){
+                  .then(function(port){
+                    var portData = port || { projects: [], aggregate: { months: [], user_income_12m_cop: [] } };
+                    mine = portData.projects || [];
+
+                    // Pintar marcadores de mis proyectos
                     mine.forEach(function(p) {
                       var lat = Number(p.lat), lng = Number(p.lng);
                       var latlng;
@@ -367,11 +355,36 @@
                         var key = Object.keys(fallbackGeo).find(function(k) { return name.includes(k); });
                         latlng = key ? fallbackGeo[key] : [4.7,-74.1];
                       }
-                      L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw)+' kW • '+(p.estado)+'<br/>'+(p.descripcion||''));
+                      L.marker(latlng).addTo(map).bindPopup('<strong>'+(p.ubicacion||'Proyecto')+'</strong><br/>'+(p.potencia_kw||0)+' kW • '+(p.percent||0)+'%<br/>Gana: $'+(p.user_income_total_cop||0));
                     });
 
+                    // Lista Mis proyectos con % y ganancia
                     var myEl = document.getElementById('my-projects');
-                    myEl.innerHTML = mine.length ? mine.map(function(p){ return (p.ubicacion)+' ('+(p.potencia_kw)+' kW)'; }).join(' • ') : 'Sin proyectos todavía.';
+                    if (mine.length){
+                      var html = '';
+                      for (var i=0;i<mine.length;i++){
+                        var p = mine[i];
+                        html += '<div class="border-b py-2 flex items-center justify-between">'+
+                                '<div><strong>'+(p.ubicacion||'Proyecto')+'</strong><div class="text-[color:var(--text-secondary)]">'+(p.potencia_kw||0)+' kW • '+(p.percent||0)+'%</div></div>'+
+                                '<div class="text-right">$'+(p.user_income_total_cop||0).toLocaleString('es-CO')+'</div>'+
+                                '</div>';
+                      }
+                      myEl.innerHTML = html;
+                    } else {
+                      myEl.innerHTML = 'Sin proyectos todavía.';
+                    }
+
+                    // Graficar ingresos agregados del portafolio
+                    var mc = document.getElementById('myProjChart');
+                    if (mc && window.Chart){
+                      var labels = (portData.aggregate && portData.aggregate.months) || ['Ene','Feb'];
+                      var series = (portData.aggregate && portData.aggregate.user_income_12m_cop) || [];
+                      new Chart(mc, {
+                        type:'line',
+                        data:{ labels: labels, datasets:[{ label:'COP', data: series, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,0.15)', tension:0.35, fill:true }]},
+                        options:{ plugins:{ legend:{ display:false }}, scales:{ y:{ ticks:{ callback:function(v){ return '$'+v; }}}}}
+                      });
+                    }
                   })
                   .catch(function(e){ console.warn(e); });
               } else {

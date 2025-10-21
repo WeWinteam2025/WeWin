@@ -5,17 +5,7 @@ router = DefaultRouter()
 router.register(r'wallets', WalletViewSet)
 router.register(r'movements', MovementViewSet)
 router.register(r'settlements', SettlementViewSet)
-router.register(r'investments', InvestmentViewSet)
-
-urlpatterns = router.urls
-
-from rest_framework.routers import DefaultRouter
-from .views import WalletViewSet, MovementViewSet, SettlementViewSet
-
-router = DefaultRouter()
-router.register(r'wallets', WalletViewSet)
-router.register(r'movimientos', MovementViewSet)
-router.register(r'liquidaciones', SettlementViewSet)
+router.register(r'investments', InvestmentViewSet, basename='investments')
 
 urlpatterns = router.urls
 

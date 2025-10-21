@@ -323,15 +323,22 @@ class Command(BaseCommand):
         add_measure_series(pdn, base_kw=250)
         add_measure_series(pds, base_kw=180)
 
-        # Inversión y número de paneles (aprox: 1 panel = 550W = 0.55 kW; costo 600 USD/kW)
-        def calc_panels_and_capex(kw):
-            panels = int(round(kw / 0.55))
-            capex = int(round(kw * 600))  # USD
-            return panels, capex
+        # CAPEX estimado en COP: 3,000,000 COP por kW (aprox). Asignar participaciones a usuarios demo y David
+        def capex_cop(kw):
+            try:
+                return int(round(float(kw) * 3000000))
+            except Exception:
+                return 0
+        # Inversionista principal (demo) toma 30%, David 20% en sus dos proyectos
         for proj in [p1, p2, p3, pdn, pds]:
-            panels, capex = calc_panels_and_capex(float(proj.potencia_kw))
-            # Guardar en terms de un contrato dummy o metadata vía Wallet/Investment? Usamos Investment como proxy
-            Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': capex, 'expected_irr': 12})
+            cap = capex_cop(proj.potencia_kw)
+            # 30% demo investor
+            Investment.objects.get_or_create(investor=actors['INVESTOR'], proyecto=proj, defaults={'amount': int(cap*0.30), 'expected_irr': 12})
+        # David como INVESTOR sobre sus dos proyectos con 20%
+        david_investor, _ = Actor.objects.get_or_create(user=u2, type='INVESTOR', defaults={'organization': org2})
+        for proj in [pdn, pds]:
+            cap = capex_cop(proj.potencia_kw)
+            Investment.objects.get_or_create(investor=david_investor, proyecto=proj, defaults={'amount': int(cap*0.20), 'expected_irr': 12})
 
         # Asignar imágenes únicas WebP si force_images está activo (determinístico por slug)
         if force_images:

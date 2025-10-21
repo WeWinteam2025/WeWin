@@ -28,6 +28,7 @@ class Settlement(models.Model):
 class Investment(models.Model):
     investor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name='investments')
     proyecto = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='investments')
+    # Monto en COP para poder calcular participación directa respecto a CAPEX estimado
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     expected_irr = models.DecimalField(max_digits=5, decimal_places=2, default=10)
     created_at = models.DateTimeField(auto_now_add=True)
