@@ -334,7 +334,7 @@
                   .then(function(me){
                     var username = me && me.username ? me.username : '';
                     if (username){
-                      return fetch(API + '/api/finance/investments/portfolio_user', { headers:{ Authorization:'Bearer '+token }})
+                      return fetch(API + '/api/investments/portfolio_user', { headers:{ Authorization:'Bearer '+token }})
                         .then(function(r){ return r.ok ? r.json() : { projects: [], aggregate:{ months:[], user_income_12m_cop:[] } }; })
                         .then(function(port){ return port; });
                     }
