@@ -26,30 +26,65 @@
       // Evitar duplicar en la propia página del bot
       var path = (location.pathname||'').toLowerCase();
       var isBotPage = path.indexOf('/dash/wehelp.html') >= 0;
-      var link = '/dash/wehelp.html?v=1735248000';
-      if (isBotPage) return;
-      var a = document.createElement('a');
-      a.id = 'wehelp-bubble';
-      a.href = link;
-      a.title = 'Habla con WeHelp';
-      a.setAttribute('aria-label', 'Habla con WeHelp');
-      a.style.position = 'fixed';
-      a.style.right = '16px';
-      a.style.bottom = '16px';
-      a.style.width = '56px';
-      a.style.height = '56px';
-      a.style.borderRadius = '50%';
-      a.style.background = '#22c55e';
-      a.style.color = '#fff';
-      a.style.display = 'flex';
-      a.style.alignItems = 'center';
-      a.style.justifyContent = 'center';
-      a.style.boxShadow = '0 10px 15px rgba(0,0,0,0.15)';
-      a.style.fontSize = '24px';
-      a.style.textDecoration = 'none';
-      a.style.zIndex = '9999';
-      a.innerHTML = '🤖';
-      document.body.appendChild(a);
+      // contenedor modal
+      var modal = document.createElement('div');
+      modal.id = 'wehelp-modal';
+      modal.style.position = 'fixed';
+      modal.style.inset = '0';
+      modal.style.background = 'rgba(0,0,0,0.5)';
+      modal.style.display = 'none';
+      modal.style.zIndex = '9998';
+      modal.innerHTML = ''+
+        '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px">'+
+        '  <div style="background:#fff;border-radius:12px;max-width:720px;width:100%;max-height:80vh;overflow:hidden;box-shadow:0 20px 30px rgba(0,0,0,0.25)">'+
+        '    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e5e7eb">'+
+        '      <strong>WeHelp • Asistente Solar</strong>'+
+        '      <button id="wehelp-close" style="background:transparent;border:0;font-size:20px;cursor:pointer">✕</button>'+
+        '    </div>'+
+        '    <div id="wehelp-host" style="padding:12px"></div>'+
+        '  </div>'+
+        '</div>';
+      document.body.appendChild(modal);
+      var closeBtn = modal.querySelector('#wehelp-close');
+      if (closeBtn) closeBtn.addEventListener('click', function(){ modal.style.display = 'none'; });
+
+      // burbuja
+      if (!isBotPage){
+        var a = document.createElement('button');
+        a.type = 'button';
+        a.id = 'wehelp-bubble';
+        a.title = 'Habla con WeHelp';
+        a.setAttribute('aria-label', 'Habla con WeHelp');
+        a.style.position = 'fixed';
+        a.style.right = '16px';
+        a.style.bottom = '16px';
+        a.style.width = '56px';
+        a.style.height = '56px';
+        a.style.borderRadius = '50%';
+        a.style.background = '#22c55e';
+        a.style.color = '#fff';
+        a.style.display = 'flex';
+        a.style.alignItems = 'center';
+        a.style.justifyContent = 'center';
+        a.style.boxShadow = '0 10px 15px rgba(0,0,0,0.15)';
+        a.style.fontSize = '24px';
+        a.style.textDecoration = 'none';
+        a.style.zIndex = '9999';
+        a.innerHTML = '🤖';
+        a.addEventListener('click', function(){
+          modal.style.display = 'block';
+          // cargar script si no está
+          function ensureScript(cb){
+            if (window.initWeHelp) return cb();
+            var s = document.createElement('script'); s.src = '/wehelp.js?v=1735248000'; s.onload = cb; document.body.appendChild(s);
+          }
+          ensureScript(function(){
+            var host = document.getElementById('wehelp-host');
+            if (host){ host.innerHTML = ''; try { window.initWeHelp(host); } catch(e) { host.innerHTML = '<div class=\'p-3 text-sm\'>No se pudo cargar WeHelp.</div>'; } }
+          });
+        });
+        document.body.appendChild(a);
+      }
     });
   } catch(e) {}
 })();
