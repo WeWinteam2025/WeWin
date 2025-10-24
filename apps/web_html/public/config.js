@@ -18,6 +18,40 @@
       document.head.appendChild(s);
     }
   } catch (e) {}
+
+  // Inyectar burbuja WeHelp en todas las páginas
+  try {
+    document.addEventListener('DOMContentLoaded', function(){
+      if (document.getElementById('wehelp-bubble')) return;
+      // Evitar duplicar en la propia página del bot
+      var path = (location.pathname||'').toLowerCase();
+      var isBotPage = path.indexOf('/dash/wehelp.html') >= 0;
+      var link = '/dash/wehelp.html?v=1735248000';
+      if (isBotPage) return;
+      var a = document.createElement('a');
+      a.id = 'wehelp-bubble';
+      a.href = link;
+      a.title = 'Habla con WeHelp';
+      a.setAttribute('aria-label', 'Habla con WeHelp');
+      a.style.position = 'fixed';
+      a.style.right = '16px';
+      a.style.bottom = '16px';
+      a.style.width = '56px';
+      a.style.height = '56px';
+      a.style.borderRadius = '50%';
+      a.style.background = '#22c55e';
+      a.style.color = '#fff';
+      a.style.display = 'flex';
+      a.style.alignItems = 'center';
+      a.style.justifyContent = 'center';
+      a.style.boxShadow = '0 10px 15px rgba(0,0,0,0.15)';
+      a.style.fontSize = '24px';
+      a.style.textDecoration = 'none';
+      a.style.zIndex = '9999';
+      a.innerHTML = '🤖';
+      document.body.appendChild(a);
+    });
+  } catch(e) {}
 })();
 
 
