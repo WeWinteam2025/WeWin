@@ -1,0 +1,37 @@
+{
+  "faqs": [
+    {
+      "q": "¿Qué es un sistema fotovoltaico on-grid?",
+      "a": "Un sistema on‑grid se conecta a la red pública, inyecta excedentes y no usa baterías. Requiere inversor conectado a red y medidor bidireccional."
+    },
+    {
+      "q": "¿Cómo estimo la energía generada al mes?",
+      "a": "Aproximación rápida en Colombia: kWh/mes ≈ kWp × 120 a 160 según ciudad (Bogotá 120, Medellín 140, Caribe 150‑160)."
+    },
+    {
+      "q": "¿Cuánto cuesta por kW instalado?",
+      "a": "Para techos comerciales en Colombia, referencia 2.5 a 3.5 millones COP/kWp (equipos, estructura e instalación)."
+    },
+    {
+      "q": "¿Qué es un PPA?",
+      "a": "Contrato de compra de energía a precio acordado (COP/kWh o USD/kWh) por un periodo (por ejemplo 5‑10 años). El offtaker paga por energía consumida o medida."
+    },
+    {
+      "q": "¿Cuál es la vida útil de los paneles?",
+      "a": "Los módulos modernos tienen garantía de potencia 25 años (80‑85% al final). Inversores típicamente 10‑12 años."
+    }
+  ],
+  "cities": {
+    "bogota": { "kwh_per_kwp": 120 },
+    "medellin": { "kwh_per_kwp": 140 },
+    "cali": { "kwh_per_kwp": 145 },
+    "barranquilla": { "kwh_per_kwp": 155 },
+    "cartagena": { "kwh_per_kwp": 150 }
+  },
+  "defaults": {
+    "capex_per_kwp_cop": 3000000,
+    "opex_pct": 0.02
+  }
+}
+
+

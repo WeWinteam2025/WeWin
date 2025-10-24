@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeHelp • Asistente Solar</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script src="/config.js?v=1735248000"></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto max-w-4xl px-6 py-8 space-y-6">
+      <header class="border-b border-slate-200 bg-[color:var(--brand-surface)]/80 backdrop-blur">
+        <div class="mx-auto max-w-7xl px-0 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+            <img src="/wewin-logo.svg" alt="WeWin" class="h-8 md:h-10 w-auto"/>
+            <span>WeHelp • Asistente Solar</span>
+          </div>
+          <nav class="flex items-center gap-4 text-sm text-[color:var(--text-primary)]">
+            <a href="/dash/index.html" class="hover:opacity-80">Dashboard</a>
+            <a href="/dash/proyectos.html" class="hover:opacity-80">Proyectos</a>
+          </nav>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="mb-3">
+          <p class="text-sm text-[color:var(--text-secondary)]">Haz preguntas sobre energía solar, dimensionamiento, costos, PPA y comunidades energéticas.</p>
+        </div>
+        <div id="chat" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
+        <form id="ask" class="mt-4 grid grid-cols-[1fr_auto] gap-2">
+          <input id="q" class="input" placeholder="Escribe tu pregunta..." autocomplete="off"/>
+          <button class="btn-primary">Preguntar</button>
+        </form>
+      </section>
+    </div>
+    <script src="/wehelp.js?v=1735248000"></script>
+  </body>
+  </html>
+
+
