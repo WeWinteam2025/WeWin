@@ -5,6 +5,18 @@
       "a": "Un sistema on‑grid se conecta a la red pública, inyecta excedentes y no usa baterías. Requiere inversor conectado a red y medidor bidireccional."
     },
     {
+      "q": "¿Dónde puedo comprar paneles?",
+      "a": "Puedes adquirir componentes en nuestro Catálogo con múltiples vendedores verificados. Abre Catálogo desde el menú o visita /dash/catalogo.html."
+    },
+    {
+      "q": "¿Hay incentivos tributarios en Colombia?",
+      "a": "La Ley 1715 y 2099 permiten deducción de renta (50% del proyecto a 5 años), exclusión de IVA para equipos FV, depreciación acelerada e importaciones con arancel 0% (según clasificación)."
+    },
+    {
+      "q": "¿Qué es medición neta?",
+      "a": "Esquema donde inyectas excedentes a la red y recibes compensación (kWh o monetaria) según regulación del comercializador. Requiere medidor bidireccional y acuerdo con la empresa."
+    },
+    {
       "q": "¿Cómo estimo la energía generada al mes?",
       "a": "Aproximación rápida en Colombia: kWh/mes ≈ kWp × 120 a 160 según ciudad (Bogotá 120, Medellín 140, Caribe 150‑160)."
     },

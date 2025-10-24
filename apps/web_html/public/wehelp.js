@@ -30,14 +30,23 @@
   }
 
   function searchFAQ(q, faqs){
-    q = (q||'').toLowerCase();
-    for (var i=0;i<faqs.length;i++){
+    var query = (q||'').toLowerCase();
+    // búsqueda por similitud simple (conteo de palabras clave)
+    var best = null, bestScore = 0;
+    for (var i=0;i<(faqs||[]).length;i++){
       var it = faqs[i];
-      if ((it.q||'').toLowerCase().indexOf(q)>=0) return it.a;
+      var text = ((it.q||'') + ' ' + (it.a||'')).toLowerCase();
+      var score = 0;
+      var words = query.split(/\s+/).filter(function(w){ return w.length>2; });
+      for (var j=0;j<words.length;j++) if (text.indexOf(words[j])>=0) score++;
+      if (score > bestScore){ bestScore = score; best = it; }
     }
-    if (q.indexOf('ppa')>=0) return 'PPA: contrato de compra de energía a precio acordado por un periodo. Permite pagar por kWh sin CAPEX inicial.';
-    if (q.indexOf('cost')>=0 || q.indexOf('precio')>=0) return 'Referencias: 2.5–3.5 MM COP/kWp en techos comerciales; residencial puede ser mayor.';
-    if (q.indexOf('gener')>=0 || q.indexOf('kwh')>=0) return 'Regla rápida: kWh/mes ≈ kWp × 120–160 según ciudad. Bogotá ≈120, Medellín ≈140, Caribe ≈150‑160.';
+    if (best && bestScore>0) return best.a;
+    // reglas de respuesta enriquecida
+    if (query.indexOf('ppa')>=0) return 'Un PPA es un contrato donde acuerdas un precio por kWh y un plazo (por ejemplo 7–12 años). Ventajas: sin CAPEX inicial y precio estable. Considera indexación, fórmulas de medición y garantías.';
+    if (query.indexOf('cost')>=0 || query.indexOf('precio')>=0 || query.indexOf('cuesta')>=0) return 'Como referencia en techos comerciales, 2.5–3.5 MM COP/kWp instalado (depende de equipos, altura, estructura, trámites). ¿De cuántos kWp estás pensando y en qué ciudad?';
+    if (query.indexOf('gener')>=0 || query.indexOf('kwh')>=0 || query.indexOf('produce')>=0) return 'Regla rápida: kWh/mes ≈ kWp × 120–160 según ciudad (Bogotá 120, Medellín 140, Caribe 150‑160). Si me das kWp y ciudad te calculo el estimado.';
+    if (query.indexOf('panel')>=0 || query.indexOf('comprar')>=0) return 'Puedes ver paneles e inversores en nuestro Catálogo con vendedores verificados: abre “Catálogo” en el menú. ¿Buscas potencia específica o marca?';
     return null;
   }
 
@@ -95,7 +104,7 @@
         }
         var ans = searchFAQ(q, kb.faqs||[]);
         if (ans){ addMsg(chatEl, 'assistant', ans); return; }
-        addMsg(chatEl, 'assistant', 'Puedo ayudarte con: costos por kWp, PPA, dimensionamiento (kWh/mes), incentivos y CE. Intenta con: "¿Cuánto cuesta por kW?" o "calcula 50 kWp en Bogotá a 300 COP/kWh".');
+        addMsg(chatEl, 'assistant', 'Para ayudarte mejor, dime: ciudad, potencia estimada (kWp) y si buscas autoconsumo o PPA. Con eso te doy costos y generación con más precisión.');
       });
     });
   }
